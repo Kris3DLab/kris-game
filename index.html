@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kris3DLab • Modellek</title>
+<title>Kris3DLab</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
@@ -12,7 +12,7 @@
     --green:#2ecc71;
     --bg:#0b0b0b;
     --card:#161616;
-    --gray:#b3b3b3;
+    --gray:#aaa;
 }
 
 *{box-sizing:border-box}
@@ -28,8 +28,7 @@ body{
 nav{
     position:sticky;
     top:0;
-    z-index:1000;
-    background:rgba(0,0,0,.9);
+    background:#000;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -43,45 +42,10 @@ nav{
 }
 .logo span{color:var(--green)}
 
-.nav-links{
-    display:flex;
-}
-
 .nav-links a{
-    color:white;
-    text-decoration:none;
     margin-left:20px;
     cursor:pointer;
     font-weight:600;
-}
-
-.nav-links a:hover{color:var(--green)}
-
-.menu-toggle{
-    display:none;
-    font-size:1.8rem;
-    cursor:pointer;
-}
-
-/* HERO */
-header{
-    min-height:60vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    background:radial-gradient(circle,#173b28 0%,#000 70%);
-}
-
-header h1{
-    font-size:3.2rem;
-    margin:0;
-}
-
-header p{
-    color:var(--gray);
-    margin-top:10px;
 }
 
 /* SECTIONS */
@@ -94,58 +58,60 @@ header p{
     padding:40px 20px;
 }
 
+/* HERO */
+header{
+    min-height:50vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+}
+
 /* GRID */
 .grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
     gap:30px;
 }
 
 /* CARD */
 .card{
     background:var(--card);
+    padding:25px;
     border-radius:20px;
-    padding:30px;
-    border:1px solid #222;
     position:relative;
-    transition:.3s;
-    overflow:hidden;
+    border:1px solid #222;
 }
 
-.card:hover{
-    transform:translateY(-8px);
-    border-color:var(--green);
-}
-
-.card::before{
-    content:"";
+.badge{
     position:absolute;
-    inset:0;
-    background:radial-gradient(circle at var(--x,50%) var(--y,50%),rgba(46,204,113,.15),transparent 40%);
-    opacity:0;
-    transition:.2s;
+    top:15px;
+    right:15px;
+    background:#e67e22;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:.75rem;
 }
-
-.card:hover::before{opacity:1}
 
 .price{
-    font-size:1.6rem;
-    font-weight:800;
     color:var(--green);
+    font-size:1.4rem;
+    font-weight:800;
     margin:15px 0;
 }
 
 .btn{
     width:100%;
-    padding:14px;
+    padding:12px;
     border:none;
-    border-radius:12px;
+    border-radius:10px;
     background:var(--green);
     font-weight:800;
     cursor:pointer;
 }
 
-.btn:hover{background:#27ae60}
+.btn.red{background:#e74c3c}
 
 /* AUTH */
 .auth-box{
@@ -156,72 +122,51 @@ header p{
 
 .auth-box input{
     width:100%;
-    padding:14px;
-    margin-bottom:12px;
-    border-radius:10px;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:8px;
     border:1px solid #333;
     background:#222;
     color:white;
 }
 
-.google-btn{
-    background:white;
-    color:#444;
-    padding:12px;
-    border-radius:10px;
-    font-weight:700;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-}
-
 /* CART */
 .cart-item{
     background:#1a1a1a;
-    padding:15px;
-    border-radius:12px;
+    padding:12px;
+    border-radius:10px;
     margin-bottom:10px;
     display:flex;
     justify-content:space-between;
-    align-items:center;
 }
 
-.remove{
-    background:#e74c3c;
-    border:none;
-    color:white;
-    padding:6px 10px;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-/* FOOTER */
-footer{
-    margin-top:80px;
-    padding:40px 5%;
-    border-top:1px solid #222;
-    color:#777;
+/* PROFILE */
+.profile{
+    max-width:500px;
+    margin:auto;
     text-align:center;
 }
 
-/* MOBILE */
-@media(max-width:768px){
-    .nav-links{
-        display:none;
-        position:absolute;
-        top:65px;
-        left:0;
-        width:100%;
-        background:#000;
-        flex-direction:column;
-    }
-    .nav-links a{
-        padding:15px;
-        border-top:1px solid #222;
-    }
-    .menu-toggle{display:block}
+.profile img{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid var(--green);
+}
+
+/* FLY */
+.fly{
+    position:fixed;
+    width:15px;
+    height:15px;
+    background:var(--green);
+    border-radius:50%;
+    animation:fly .7s forwards;
+}
+
+@keyframes fly{
+    to{transform:translate(200px,-200px) scale(0);opacity:0}
 }
 </style>
 </head>
@@ -230,150 +175,186 @@ footer{
 
 <nav>
 <div class="logo">Kris3D<span>Lab</span></div>
-<div class="menu-toggle" onclick="toggleMenu()">☰</div>
 <div class="nav-links">
-<a onclick="showSection('home')">HOME</a>
-<a onclick="showSection('models')">MODELS</a>
-<a onclick="showSection('auth')">LOGIN</a>
-<a onclick="showSection('cart')">CART (<span id="cart-count">0</span>)</a>
+<a onclick="show('home')">Főoldal</a>
+<a onclick="show('models')">Modellek</a>
+<a onclick="show('profile')">Profil</a>
+<a onclick="show('cart')">Kosár (<span id="cartCount">0</span>)</a>
+<a onclick="logout()">Kilépés</a>
 </div>
 </nav>
 
+<!-- HOME -->
 <section id="home" class="section active">
 <header>
-<h1>3D MODELLEK & CSOMAGOK</h1>
+<h1>3D modellek</h1>
 <p>Játékhoz és projektekhez használható modellek</p>
 </header>
+
+<div class="container">
+<div class="profile">
+<h2>Saját modellt szeretnél?</h2>
+<p>Írj rám:</p>
+<p><strong>Kris3DLab</strong></p>
+<p>YouTube: @kris3dlab</p>
+<p>Gmail: kris3dlab@gmail.com</p>
+</div>
+</div>
 </section>
 
+<!-- MODELS -->
 <section id="models" class="section">
 <div class="container">
 <div class="grid">
+
 <div class="card">
+<div class="badge">Hamarosan</div>
 <h3>Magyar Brainrot Pack</h3>
-<p>7 magyar mém modell</p>
 <div class="price">4 500 Ft</div>
 <button class="btn" onclick="addToCart('Magyar Brainrot Pack',4500)">Kosárba</button>
 </div>
 
 <div class="card">
+<div class="badge">Hamarosan</div>
 <h3>Cyberpunk City Kit</h3>
-<p>Moduláris város elemek</p>
 <div class="price">8 900 Ft</div>
 <button class="btn" onclick="addToCart('Cyberpunk City Kit',8900)">Kosárba</button>
 </div>
+
 </div>
 </div>
 </section>
 
+<!-- AUTH -->
 <section id="auth" class="section">
 <div class="container auth-box">
-<h2>Belépés</h2>
-<input type="email" placeholder="Email">
-<input type="password" placeholder="Jelszó">
-<button class="btn" onclick="loginSim()">Belépés</button>
+<h2>Regisztráció</h2>
+<input id="regName" placeholder="Név">
+<input id="regEmail" placeholder="Email">
+<input id="regPass" type="password" placeholder="Jelszó">
+<button class="btn" onclick="register()">Regisztráció</button>
 
-<p style="margin:20px 0;color:#555">vagy</p>
+<hr style="margin:20px 0">
 
-<div class="google-btn" onclick="googleLogin()">
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20">
-Belépés Google-lel
-</div>
+<h2>Bejelentkezés</h2>
+<input id="logEmail" placeholder="Email">
+<input id="logPass" type="password" placeholder="Jelszó">
+<button class="btn" onclick="login()">Belépés</button>
 </div>
 </section>
 
+<!-- PROFILE -->
+<section id="profile" class="section">
+<div class="container profile">
+<h2>Profil</h2>
+<img id="avatar" src="">
+<br><br>
+<input type="file" onchange="changeAvatar(event)">
+<input id="profileName">
+<br><br>
+<button class="btn" onclick="saveProfile()">Mentés</button>
+</div>
+</section>
+
+<!-- CART -->
 <section id="cart" class="section">
 <div class="container">
 <h2>Kosár</h2>
-<div id="cart-list"></div>
-<h3 id="total"></h3>
+<div id="cartList"></div>
+<h3 id="cartTotal"></h3>
 </div>
 </section>
 
-<footer>
-<p>3D modellek egyedi elképzelésekhez</p>
-<p>© Kris3DLab</p>
-</footer>
-
-<!-- FIREBASE GOOGLE LOGIN -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-/* 🔴 IDE ÍRD BE A SAJÁT FIREBASE ADATAID */
-const firebaseConfig = {
-    apiKey: "IDE_API_KEY",
-    authDomain: "IDE_AUTH_DOMAIN",
-    projectId: "IDE_PROJECT_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-window.googleLogin = function(){
-    signInWithPopup(auth, provider)
-    .then(res=>{
-        alert("Sikeres belépés: " + res.user.email);
-        showSection('home');
-    })
-    .catch(err=>alert(err.message));
-}
-</script>
-
 <script>
-let cart=[];
+let user = JSON.parse(localStorage.getItem("user"));
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-function showSection(id){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-window.scrollTo(0,0);
+if(!user) show("auth");
+updateCart();
+
+function show(id){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 }
 
-function toggleMenu(){
-const nav=document.querySelector('.nav-links');
-nav.style.display=nav.style.display==="flex"?"none":"flex";
+function register(){
+user={
+name:regName.value,
+email:regEmail.value,
+pass:regPass.value,
+avatar:""
+};
+localStorage.setItem("user",JSON.stringify(user));
+alert("Sikeres regisztráció!");
+show("profile");
+loadProfile();
+}
+
+function login(){
+const u=JSON.parse(localStorage.getItem("user"));
+if(!u || u.email!==logEmail.value || u.pass!==logPass.value){
+alert("Hibás adatok");
+return;
+}
+user=u;
+alert("Sikeres belépés!");
+show("profile");
+loadProfile();
+}
+
+function logout(){
+localStorage.removeItem("user");
+alert("Kiléptél");
+location.reload();
+}
+
+function loadProfile(){
+profileName.value=user.name;
+avatar.src=user.avatar||"https://via.placeholder.com/120";
+}
+
+function saveProfile(){
+user.name=profileName.value;
+localStorage.setItem("user",JSON.stringify(user));
+alert("Profil mentve");
+}
+
+function changeAvatar(e){
+const reader=new FileReader();
+reader.onload=()=>{
+avatar.src=reader.result;
+user.avatar=reader.result;
+localStorage.setItem("user",JSON.stringify(user));
+};
+reader.readAsDataURL(e.target.files[0]);
 }
 
 function addToCart(name,price){
 cart.push({name,price});
+localStorage.setItem("cart",JSON.stringify(cart));
 updateCart();
 }
 
 function updateCart(){
-document.getElementById('cart-count').innerText=cart.length;
-const list=document.getElementById('cart-list');
+cartCount.innerText=cart.length;
+cartList.innerHTML="";
 let sum=0;
-list.innerHTML="";
 cart.forEach((i,idx)=>{
 sum+=i.price;
-list.innerHTML+=`
+cartList.innerHTML+=`
 <div class="cart-item">
-<span>${i.name} – ${i.price} Ft</span>
-<button class="remove" onclick="removeItem(${idx})">X</button>
+${i.name} - ${i.price} Ft
+<button onclick="removeItem(${idx})">X</button>
 </div>`;
 });
-document.getElementById('total').innerText="Összesen: "+sum+" Ft";
+cartTotal.innerText="Összesen: "+sum+" Ft";
 }
 
 function removeItem(i){
 cart.splice(i,1);
+localStorage.setItem("cart",JSON.stringify(cart));
 updateCart();
 }
-
-function loginSim(){
-alert("Belépés kész (emailes verzió)");
-showSection('home');
-}
-
-/* CARD EFFECT */
-document.querySelectorAll('.card').forEach(c=>{
-c.addEventListener('mousemove',e=>{
-const r=c.getBoundingClientRect();
-c.style.setProperty('--x',e.clientX-r.left+"px");
-c.style.setProperty('--y',e.clientY-r.top+"px");
-});
-});
 </script>
 
 </body>
