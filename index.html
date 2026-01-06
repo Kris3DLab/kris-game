@@ -5,168 +5,140 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kris3DLab</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
-    --green:#2ecc71;
-    --bg:#0b0b0b;
-    --card:#161616;
-    --gray:#aaa;
+  --green:#00ff88;
+  --dark:#050505;
+  --card:#0d0d0d;
 }
 
 *{box-sizing:border-box}
-
 body{
-    margin:0;
-    font-family:Inter,sans-serif;
-    background:var(--bg);
-    color:white;
+  margin:0;
+  font-family:'Orbitron',sans-serif;
+  background:radial-gradient(circle at top,#062d1a,#000);
+  color:white;
 }
 
 /* NAV */
 nav{
-    position:sticky;
-    top:0;
-    background:#000;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px 5%;
-    border-bottom:1px solid #222;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px;
+  border-bottom:1px solid #0f3;
+  backdrop-filter:blur(10px);
 }
-
-.logo{
-    font-weight:800;
-    font-size:1.6rem;
+.logo{font-size:1.6rem;color:var(--green)}
+nav button{
+  background:none;
+  border:1px solid var(--green);
+  color:var(--green);
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
 }
-.logo span{color:var(--green)}
-
-.nav-links a{
-    margin-left:20px;
-    cursor:pointer;
-    font-weight:600;
-}
+nav button:hover{background:var(--green);color:black}
 
 /* SECTIONS */
-.section{display:none}
-.section.active{display:block}
+section{display:none;padding:40px;max-width:1200px;margin:auto}
+section.active{display:block;animation:fade .6s ease}
 
-.container{
-    max-width:1200px;
-    margin:auto;
-    padding:40px 20px;
+@keyframes fade{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
-/* HERO */
-header{
-    min-height:50vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-}
-
-/* GRID */
+/* CARDS */
 .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:30px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:30px;
 }
-
-/* CARD */
 .card{
-    background:var(--card);
-    padding:25px;
-    border-radius:20px;
-    position:relative;
-    border:1px solid #222;
+  background:linear-gradient(145deg,#0b0b0b,#111);
+  border:1px solid #0f3;
+  border-radius:20px;
+  padding:25px;
+  position:relative;
+  box-shadow:0 0 25px rgba(0,255,150,.15);
+  transition:.3s;
 }
-
+.card:hover{
+  transform:translateY(-10px) scale(1.03);
+  box-shadow:0 0 40px rgba(0,255,150,.4);
+}
 .badge{
-    position:absolute;
-    top:15px;
-    right:15px;
-    background:#e67e22;
-    padding:5px 12px;
-    border-radius:20px;
-    font-size:.75rem;
+  position:absolute;
+  top:15px;right:15px;
+  background:#ffae00;
+  color:black;
+  font-size:.7rem;
+  padding:5px 10px;
+  border-radius:50px;
 }
+.price{color:var(--green);font-size:1.4rem;margin:10px 0}
 
-.price{
-    color:var(--green);
-    font-size:1.4rem;
-    font-weight:800;
-    margin:15px 0;
-}
-
+/* BUTTON */
 .btn{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    background:var(--green);
-    font-weight:800;
-    cursor:pointer;
+  width:100%;
+  background:var(--green);
+  color:black;
+  border:none;
+  padding:14px;
+  font-weight:bold;
+  border-radius:12px;
+  cursor:pointer;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 10px var(--green)}
+  50%{box-shadow:0 0 30px var(--green)}
+  100%{box-shadow:0 0 10px var(--green)}
 }
 
-.btn.red{background:#e74c3c}
-
-/* AUTH */
-.auth-box{
-    max-width:400px;
-    margin:auto;
-    text-align:center;
-}
-
-.auth-box input{
-    width:100%;
-    padding:12px;
-    margin-bottom:10px;
-    border-radius:8px;
-    border:1px solid #333;
-    background:#222;
-    color:white;
+/* INPUT */
+input{
+  width:100%;
+  padding:14px;
+  margin-bottom:15px;
+  background:#111;
+  border:1px solid #0f3;
+  border-radius:10px;
+  color:white;
 }
 
 /* CART */
 .cart-item{
-    background:#1a1a1a;
-    padding:12px;
-    border-radius:10px;
-    margin-bottom:10px;
-    display:flex;
-    justify-content:space-between;
+  display:flex;
+  justify-content:space-between;
+  background:#111;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:10px;
+  animation:add .4s ease;
+}
+@keyframes add{
+  from{transform:scale(.8);opacity:0}
+  to{transform:scale(1);opacity:1}
 }
 
-/* PROFILE */
-.profile{
-    max-width:500px;
-    margin:auto;
-    text-align:center;
+/* PROFILE IMAGE */
+.avatar{
+  width:120px;height:120px;
+  border-radius:50%;
+  border:2px solid var(--green);
+  object-fit:cover;
+  margin-bottom:15px;
 }
 
-.profile img{
-    width:120px;
-    height:120px;
-    border-radius:50%;
-    object-fit:cover;
-    border:3px solid var(--green);
-}
-
-/* FLY */
-.fly{
-    position:fixed;
-    width:15px;
-    height:15px;
-    background:var(--green);
-    border-radius:50%;
-    animation:fly .7s forwards;
-}
-
-@keyframes fly{
-    to{transform:translate(200px,-200px) scale(0);opacity:0}
+/* FOOTER */
+footer{
+  text-align:center;
+  padding:40px;
+  color:#555;
 }
 </style>
 </head>
@@ -174,187 +146,136 @@ header{
 <body>
 
 <nav>
-<div class="logo">Kris3D<span>Lab</span></div>
-<div class="nav-links">
-<a onclick="show('home')">Főoldal</a>
-<a onclick="show('models')">Modellek</a>
-<a onclick="show('profile')">Profil</a>
-<a onclick="show('cart')">Kosár (<span id="cartCount">0</span>)</a>
-<a onclick="logout()">Kilépés</a>
-</div>
+  <div class="logo">Kris3DLab</div>
+  <div>
+    <button onclick="show('home')">Home</button>
+    <button onclick="show('models')">Modellek</button>
+    <button onclick="show('cart')">Kosár (<span id="cartCount">0</span>)</button>
+    <button onclick="show(user?'profile':'auth')">Profil</button>
+  </div>
 </nav>
 
-<!-- HOME -->
-<section id="home" class="section active">
-<header>
-<h1>3D modellek</h1>
-<p>Játékhoz és projektekhez használható modellek</p>
-</header>
+<section id="home" class="active">
+  <h1>Roblox 3D Modellek</h1>
+  <p>Zöld, futurisztikus Roblox assetek (RBXM)</p>
 
-<div class="container">
-<div class="profile">
-<h2>Saját modellt szeretnél?</h2>
-<p>Írj rám:</p>
-<p><strong>Kris3DLab</strong></p>
-<p>YouTube: @kris3dlab</p>
-<p>Gmail: kris3dlab@gmail.com</p>
-</div>
-</div>
+  <div class="card" style="margin-top:40px">
+    <h2>Saját modellt szeretnél?</h2>
+    <p>Írj rám és megbeszéljük!</p>
+    <p style="color:var(--green)">
+      YouTube: @kris3dlab<br>
+      Gmail: kris3dlab@gmail.com
+    </p>
+  </div>
 </section>
 
-<!-- MODELS -->
-<section id="models" class="section">
-<div class="container">
-<div class="grid">
+<section id="models">
+  <h2>Elérhető csomagok</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="badge">Hamarosan</div>
+      <h3>Roblox City Pack</h3>
+      <p>Városi elemek játékhoz</p>
+      <div class="price">4 500 Ft</div>
+      <button class="btn" onclick="addToCart('Roblox City Pack',4500)">Kosárba</button>
+    </div>
 
-<div class="card">
-<div class="badge">Hamarosan</div>
-<h3>Magyar Brainrot Pack</h3>
-<div class="price">4 500 Ft</div>
-<button class="btn" onclick="addToCart('Magyar Brainrot Pack',4500)">Kosárba</button>
-</div>
-
-<div class="card">
-<div class="badge">Hamarosan</div>
-<h3>Cyberpunk City Kit</h3>
-<div class="price">8 900 Ft</div>
-<button class="btn" onclick="addToCart('Cyberpunk City Kit',8900)">Kosárba</button>
-</div>
-
-</div>
-</div>
+    <div class="card">
+      <div class="badge">Hamarosan</div>
+      <h3>Weapon Pack</h3>
+      <p>Roblox fegyver modellek</p>
+      <div class="price">3 200 Ft</div>
+      <button class="btn" onclick="addToCart('Weapon Pack',3200)">Kosárba</button>
+    </div>
+  </div>
 </section>
 
-<!-- AUTH -->
-<section id="auth" class="section">
-<div class="container auth-box">
-<h2>Regisztráció</h2>
-<input id="regName" placeholder="Név">
-<input id="regEmail" placeholder="Email">
-<input id="regPass" type="password" placeholder="Jelszó">
-<button class="btn" onclick="register()">Regisztráció</button>
-
-<hr style="margin:20px 0">
-
-<h2>Bejelentkezés</h2>
-<input id="logEmail" placeholder="Email">
-<input id="logPass" type="password" placeholder="Jelszó">
-<button class="btn" onclick="login()">Belépés</button>
-</div>
+<section id="auth">
+  <h2>Regisztráció / Belépés</h2>
+  <input id="nameInput" placeholder="Felhasználónév">
+  <button class="btn" onclick="login()">Belépés</button>
 </section>
 
-<!-- PROFILE -->
-<section id="profile" class="section">
-<div class="container profile">
-<h2>Profil</h2>
-<img id="avatar" src="">
-<br><br>
-<input type="file" onchange="changeAvatar(event)">
-<input id="profileName">
-<br><br>
-<button class="btn" onclick="saveProfile()">Mentés</button>
-</div>
+<section id="profile">
+  <h2>Profil</h2>
+  <img id="avatar" class="avatar">
+  <input type="file" onchange="uploadAvatar(this)">
+  <input id="newName" placeholder="Új név">
+  <button class="btn" onclick="saveProfile()">Mentés</button>
 </section>
 
-<!-- CART -->
-<section id="cart" class="section">
-<div class="container">
-<h2>Kosár</h2>
-<div id="cartList"></div>
-<h3 id="cartTotal"></h3>
-</div>
+<section id="cart">
+  <h2>Kosár</h2>
+  <div id="cartList"></div>
+  <button class="btn" onclick="purchase()">Vásárlás</button>
 </section>
+
+<section id="download">
+  <h2>Letöltés</h2>
+  <a class="btn" href="model.rbxm" download>RBXM letöltése</a>
+</section>
+
+<footer>
+  © Kris3DLab
+</footer>
 
 <script>
-let user = JSON.parse(localStorage.getItem("user"));
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-if(!user) show("auth");
-updateCart();
+let user = localStorage.getItem('user')
+let cart = JSON.parse(localStorage.getItem('cart')||'[]')
 
 function show(id){
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
-
-function register(){
-user={
-name:regName.value,
-email:regEmail.value,
-pass:regPass.value,
-avatar:""
-};
-localStorage.setItem("user",JSON.stringify(user));
-alert("Sikeres regisztráció!");
-show("profile");
-loadProfile();
-}
-
-function login(){
-const u=JSON.parse(localStorage.getItem("user"));
-if(!u || u.email!==logEmail.value || u.pass!==logPass.value){
-alert("Hibás adatok");
-return;
-}
-user=u;
-alert("Sikeres belépés!");
-show("profile");
-loadProfile();
-}
-
-function logout(){
-localStorage.removeItem("user");
-alert("Kiléptél");
-location.reload();
-}
-
-function loadProfile(){
-profileName.value=user.name;
-avatar.src=user.avatar||"https://via.placeholder.com/120";
-}
-
-function saveProfile(){
-user.name=profileName.value;
-localStorage.setItem("user",JSON.stringify(user));
-alert("Profil mentve");
-}
-
-function changeAvatar(e){
-const reader=new FileReader();
-reader.onload=()=>{
-avatar.src=reader.result;
-user.avatar=reader.result;
-localStorage.setItem("user",JSON.stringify(user));
-};
-reader.readAsDataURL(e.target.files[0]);
-}
-
-function addToCart(name,price){
-cart.push({name,price});
-localStorage.setItem("cart",JSON.stringify(cart));
-updateCart();
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
 }
 
 function updateCart(){
-cartCount.innerText=cart.length;
-cartList.innerHTML="";
-let sum=0;
-cart.forEach((i,idx)=>{
-sum+=i.price;
-cartList.innerHTML+=`
-<div class="cart-item">
-${i.name} - ${i.price} Ft
-<button onclick="removeItem(${idx})">X</button>
-</div>`;
-});
-cartTotal.innerText="Összesen: "+sum+" Ft";
+  cartCount.innerText=cart.length
+  cartList.innerHTML=''
+  cart.forEach((i,idx)=>{
+    cartList.innerHTML+=`
+      <div class="cart-item">
+        <div>${i.name}</div>
+        <div>${i.price} Ft</div>
+      </div>`
+  })
+  localStorage.setItem('cart',JSON.stringify(cart))
 }
 
-function removeItem(i){
-cart.splice(i,1);
-localStorage.setItem("cart",JSON.stringify(cart));
-updateCart();
+function addToCart(name,price){
+  cart.push({name,price})
+  updateCart()
 }
+
+function login(){
+  const name=nameInput.value.trim()
+  if(!name)return
+  user={name,avatar:''}
+  localStorage.setItem('user',JSON.stringify(user))
+  show('profile')
+}
+
+function saveProfile(){
+  user.name=newName.value||user.name
+  localStorage.setItem('user',JSON.stringify(user))
+}
+
+function uploadAvatar(input){
+  const reader=new FileReader()
+  reader.onload=()=>{avatar.src=reader.result;user.avatar=reader.result;saveProfile()}
+  reader.readAsDataURL(input.files[0])
+}
+
+function purchase(){
+  if(cart.length===0)return
+  localStorage.setItem('purchased','true')
+  show('download')
+}
+
+if(user){
+  user=JSON.parse(user)
+  avatar.src=user.avatar||''
+}
+updateCart()
 </script>
 
 </body>
