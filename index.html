@@ -4,42 +4,190 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kris3DLab • Modelljei</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
-        :root { --main-green: #2ecc71; --dark-bg: #0f0f0f; --card-bg: #1a1a1a; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--dark-bg); color: white; scroll-behavior: smooth; }
-        
-        /* Navigáció */
-        nav { background: #111; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--main-green); position: sticky; top: 0; z-index: 1000; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: white; }
+        :root {
+            --main-green: #2ecc71;
+            --dark-bg: #0b0b0b;
+            --card-bg: #161616;
+            --text-gray: #b3b3b3;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Smooth Scroll & Animations */
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Navigation */
+        nav {
+            background: rgba(11, 11, 11, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
         .logo span { color: var(--main-green); }
-        .nav-links a { color: white; text-decoration: none; margin-left: 20px; cursor: pointer; }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
         .nav-links a:hover { color: var(--main-green); }
 
-        /* Header */
-        header { background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop'); background-size: cover; padding: 100px 20px; text-align: center; }
+        /* Hero Section */
+        header {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, #1a3a2a 0%, var(--dark-bg) 70%);
+        }
 
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
+        header h1 { font-size: 4rem; margin: 0; font-weight: 800; }
+        header p { color: var(--text-gray); font-size: 1.2rem; margin-top: 10px; }
+
+        /* Grid System */
+        .container { max-width: 1200px; margin: auto; padding: 40px 20px; }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.5s ease-out; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        /* Card Design */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #222;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .card:hover {
+            border-color: var(--main-green);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(46, 204, 113, 0.1);
+        }
+
+        .price-tag { font-size: 1.8rem; font-weight: 800; color: var(--main-green); margin: 20px 0; }
         
-        /* Szekciók */
-        .section { display: none; padding: 40px 0; }
-        .section.active { display: block; }
+        .badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #e67e22;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
 
-        /* Kártyák */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid #333; transition: 0.3s; text-align: center; }
-        .card:hover { border-color: var(--main-green); transform: translateY(-5px); }
-        .price { font-size: 1.4rem; color: var(--main-green); margin: 10px 0; font-weight: bold; }
+        .btn {
+            background: var(--main-green);
+            color: black;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 800;
+            width: 100%;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
 
-        /* Gombok */
-        .btn { background: var(--main-green); color: black; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn:hover { background: #27ae60; }
-        .btn-google { background: white; color: #444; margin-top: 10px; }
+        .btn:hover { background: #27ae60; transform: scale(1.05); }
 
-        /* Kosár stílus */
-        .cart-item { display: flex; justify-content: space-between; background: #222; padding: 10px; margin-bottom: 10px; border-radius: 5px; border-left: 4px solid var(--main-green); }
-        
-        input { width: 100%; padding: 10px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
+        /* Cart Styles */
+        .cart-item {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #333;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Footer & Contact */
+        footer {
+            background: #080808;
+            padding: 60px 5%;
+            border-top: 1px solid #222;
+            margin-top: 100px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .contact-info p { margin: 10px 0; color: var(--text-gray); }
+        .contact-info i { color: var(--main-green); margin-right: 10px; width: 20px; }
+
+        /* Custom Order Box */
+        .custom-box {
+            background: linear-gradient(135deg, #161616, #0d2a1a);
+            border: 2px dashed var(--main-green);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        /* Google Fix UI */
+        .auth-container { max-width: 400px; margin: auto; text-align: center; }
+        .google-btn {
+            background: white;
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -47,69 +195,107 @@
 <nav>
     <div class="logo">Kris3D<span>Lab</span></div>
     <div class="nav-links">
-        <a onclick="showSection('home')">Főoldal</a>
-        <a onclick="showSection('models')">Modellek</a>
-        <a onclick="showSection('auth')">Bejelentkezés</a>
-        <a onclick="showSection('cart')">Kosár (<span id="cart-count">0</span>)</a>
+        <a onclick="showSection('home')">HOME</a>
+        <a onclick="showSection('models')">MODELS</a>
+        <a onclick="showSection('auth')">LOGIN</a>
+        <a onclick="showSection('cart')">CART (<span id="cart-count">0</span>)</a>
     </div>
 </nav>
 
 <section id="home" class="section active">
-    <header>
-        <h1>Kris3DLab • Modelljei</h1>
-        <p>Minőségi 3D csomagok és digitális assetek.</p>
-        <button class="btn" style="width: auto;" onclick="showSection('models')">Modellek böngészése</button>
+    <header class="fade-in">
+        <h1>PRO 3D ASSETS</h1>
+        <p>Minőségi modellek, amikkel szintet lépsz.</p>
     </header>
+    
+    <div class="container">
+        <div class="custom-box fade-in">
+            <h2>SAJÁT MODELLT SZERETNÉL?</h2>
+            <p>Egyedi elképzeléseid vannak? Írj rám és megbeszéljük az árat!</p>
+            <p style="color: var(--main-green); font-weight: bold;">Gmail: kris3dlab@gmail.com</p>
+        </div>
+    </div>
 </section>
 
 <section id="models" class="section">
     <div class="container">
-        <h2 style="color: var(--main-green);">Elérhető Modellek</h2>
+        <h2 style="font-size: 2.5rem; margin-bottom: 40px;">ELÉRHETŐ <span style="color: var(--main-green);">CSOMAGOK</span></h2>
         <div class="grid">
             <div class="card">
-                <span style="color: #e67e22;">Hamarosan...</span>
-                <h3>Magyar Brainrot Csomag</h3>
-                <p>7 válogatott magyar mém modell.</p>
-                <div class="price">4 500 Ft</div>
-                <button class="btn" onclick="addToCart('Magyar Brainrot Csomag', 4500)">Kosárba</button>
+                <div class="badge">Hamarosan...</div>
+                <h3>Magyar Brainrot Pack</h3>
+                <p>7 db ikonikus magyar mém modell, játékba kész állapotban.</p>
+                <div class="price-tag">4.500 Ft</div>
+                <button class="btn" onclick="addToCart('Magyar Brainrot Pack', 4500)">Kosárba teszem</button>
             </div>
+
             <div class="card">
-                <h3>Low-Poly Autó</h3>
-                <p>Játékfejlesztéshez optimalizálva.</p>
-                <div class="price">2 000 Ft</div>
-                <button class="btn" onclick="addToCart('Low-Poly Autó', 2000)">Kosárba</button>
+                <h3>Cyberpunk City Kit</h3>
+                <p>Teljes moduláris város építő készlet (20+ elem).</p>
+                <div class="price-tag">8.900 Ft</div>
+                <button class="btn" onclick="addToCart('Cyberpunk City Kit', 8900)">Kosárba teszem</button>
+            </div>
+
+            <div class="card">
+                <h3>Ultra-Realistic Weapon</h3>
+                <p>AK-47 modell 4K textúrákkal, minden részlettel.</p>
+                <div class="price-tag">3.200 Ft</div>
+                <button class="btn" onclick="addToCart('Ultra-Realistic Weapon', 3200)">Kosárba teszem</button>
             </div>
         </div>
     </div>
 </section>
 
 <section id="auth" class="section">
-    <div class="container" style="max-width: 400px;">
-        <h2>Bejelentkezés</h2>
-        <input type="email" placeholder="Email cím">
-        <input type="password" placeholder="Jelszó">
-        <button class="btn">Belépés Emaillel</button>
-        <hr style="margin: 20px 0; border: 0.5px solid #333;">
-        <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleCredentialResponse"></div>
-        <div class="g_id_signin" data-type="standard"></div>
-        <p style="font-size: 0.8rem; margin-top: 15px; color: #888;">Nincs még fiókod? Regisztrálj ingyen.</p>
+    <div class="container auth-container">
+        <h2 style="font-size: 2rem;">Üdvözlünk!</h2>
+        <p style="color: var(--text-gray);">Jelentkezz be a vásárláshoz.</p>
+        <input type="email" placeholder="Email" style="width:100%; padding:15px; margin-bottom:10px; background:#222; border:1px solid #333; color:white; border-radius:10px;">
+        <input type="password" placeholder="Jelszó" style="width:100%; padding:15px; margin-bottom:20px; background:#222; border:1px solid #333; color:white; border-radius:10px;">
+        <button class="btn" onclick="loginSim()">BELÉPÉS EMAIL-LEL</button>
+        
+        <div style="margin: 25px 0; color: #444;">VAGY</div>
+        
+        <a href="#" class="google-btn" onclick="alert('Google Auth szimuláció: Sikeres belépés!')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20" style="margin-right: 10px;">
+            Belépés Google fiókkal
+        </a>
     </div>
 </section>
 
 <section id="cart" class="section">
-    <div class="container" style="max-width: 600px;">
-        <h2>Kosarad tartalma</h2>
-        <div id="cart-items">
-            <p>A kosarad jelenleg üres.</p>
+    <div class="container" style="max-width: 800px;">
+        <h2 style="font-size: 2.5rem;">A KOSARAD</h2>
+        <div id="cart-list">
+            <p style="color: var(--text-gray);">A kosarad jelenleg üres.</p>
         </div>
-        <div id="cart-total" style="margin-top: 20px; font-size: 1.2rem; font-weight: bold;"></div>
-        <div id="payment-area" style="display: none; margin-top: 30px;">
-            <h3>Fizetési mód: PayPal</h3>
-            <p>A fizetés után a letöltési linket emailben küldjük el.</p>
-            <button class="btn" onclick="alert('Átirányítás a PayPal biztonságos oldalára...')">Fizetés indítása</button>
+        <div id="cart-footer" style="display: none; margin-top: 40px; border-top: 1px solid #222; padding-top: 20px;">
+            <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">
+                <span>ÖSSZESEN:</span>
+                <span id="total-price" style="color: var(--main-green);">0 Ft</span>
+            </div>
+            <button class="btn" onclick="checkout()">FIZETÉS PAYPAL-LAL</button>
         </div>
     </div>
 </section>
+
+<footer>
+    <div class="footer-grid">
+        <div>
+            <div class="logo">Kris3D<span>Lab</span></div>
+            <p>A jövő 3D modelljei, ma.</p>
+        </div>
+        <div class="contact-info">
+            <h3>ELÉRHETŐSÉG</h3>
+            <p><i class="fab fa-youtube"></i> YouTube: @kris3dlab</p>
+            <p><i class="fas fa-envelope"></i> kris3dlab@gmail.com</p>
+            <p><i class="fas fa-comment-dots"></i> Egyedi modellek: Keress privátban!</p>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 50px; color: #333; font-size: 0.8rem;">
+        © 2026 Kris3DLab • Modelljei | Created by Gemini
+    </div>
+</footer>
 
 <script>
     let cart = [];
@@ -117,43 +303,57 @@
     function showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+        window.scrollTo(0,0);
     }
 
     function addToCart(name, price) {
-        cart.push({name, price});
-        updateCart();
+        cart.push({ id: Date.now(), name: name, price: price });
+        updateCartUI();
         alert(name + " hozzáadva a kosárhoz!");
     }
 
-    function updateCart() {
-        document.getElementById('cart-count').innerText = cart.length;
-        const container = document.getElementById('cart-items');
-        const totalContainer = document.getElementById('cart-total');
-        const payArea = document.getElementById('payment-area');
+    function removeFromCart(id) {
+        cart = cart.filter(item => item.id !== id);
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const cartList = document.getElementById('cart-list');
+        const cartCount = document.getElementById('cart-count');
+        const cartFooter = document.getElementById('cart-footer');
+        const totalPrice = document.getElementById('total-price');
+
+        cartCount.innerText = cart.length;
 
         if (cart.length === 0) {
-            container.innerHTML = "<p>A kosarad üres.</p>";
-            totalContainer.innerText = "";
-            payArea.style.display = "none";
+            cartList.innerHTML = '<p style="color: var(--text-gray);">A kosarad jelenleg üres.</p>';
+            cartFooter.style.display = 'none';
         } else {
-            container.innerHTML = cart.map(item => `
-                <div class="cart-item">
-                    <span>${item.name}</span>
-                    <span>${item.price} Ft</span>
-                </div>
-            `).join('');
-            
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            totalContainer.innerText = "Összesen: " + total + " Ft";
-            payArea.style.display = "block";
+            cartFooter.style.display = 'block';
+            let total = 0;
+            cartList.innerHTML = cart.map(item => {
+                total += item.price;
+                return `
+                    <div class="cart-item fade-in">
+                        <div>
+                            <div style="font-weight: bold;">${item.name}</div>
+                            <div style="color: var(--main-green);">${item.price} Ft</div>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromCart(${item.id})">Törlés</button>
+                    </div>
+                `;
+            }).join('');
+            totalPrice.innerText = total.toLocaleString() + " Ft";
         }
     }
 
-    // Google Auth Callback (szimuláció)
-    function handleCredentialResponse(response) {
-        console.log("Google bejelentkezés sikeres!");
-        alert("Sikeres Google bejelentkezés!");
+    function loginSim() {
+        alert("Sikeres bejelentkezés! Üdvözlünk a Kris3DLab-nál.");
         showSection('home');
+    }
+
+    function checkout() {
+        alert("Átirányítás a PayPal biztonságos fizetési oldalára...");
     }
 </script>
 
