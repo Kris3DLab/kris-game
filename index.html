@@ -2,138 +2,312 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <title>3D Mario HTML5</title>
+    <title>Szuper Mario - Boss Fight & Level 2</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #5c94fc; }
-        #ui {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-family: Arial, sans-serif;
-            font-size: 20px;
-            text-shadow: 2px 2px black;
+        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #111; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
+        #game-container { position: relative; width: 800px; height: 400px; border: 5px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        canvas { display: block; background-color: #5c94fc; }
+        
+        /* UI és MENÜK */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: white; z-index: 10; text-align: center;
         }
+        h1 { color: #ff4500; font-size: 60px; margin: 0; text-shadow: 4px 4px #000; }
+        button {
+            padding: 15px 40px; font-size: 24px; cursor: pointer; margin-top: 20px;
+            background-color: #e52521; color: white; border: 4px solid #fff; font-weight: bold;
+        }
+        button:hover { background-color: #ff4500; }
+        #hud {
+            position: absolute; top: 10px; left: 10px; color: white; font-size: 18px; 
+            pointer-events: none; width: 95%; display: flex; justify-content: space-between;
+        }
+        #boss-bar-container {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 300px; height: 20px; border: 2px solid white; display: none;
+        }
+        #boss-bar { width: 100%; height: 100%; background: red; transition: width 0.3s; }
     </style>
 </head>
 <body>
-    <div id="ui">Mozgás: Nyilak / WASD | Ugrás: Space</div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <div id="game-container">
+        <div id="hud">
+            <div>SZINT: <span id="lvl-txt">1</span> | ÉRME: <span id="coin-txt">0</span></div>
+            <div>ÉLET: <span id="hp-txt">3</span></div>
+        </div>
+
+        <div id="boss-bar-container" id="boss-ui">
+            <div id="boss-bar"></div>
+            <div style="color: white; font-size: 10px; text-align: center;">BOSS HP</div>
+        </div>
+
+        <div id="start-menu" class="overlay">
+            <h1>SUPER MARIO</h1>
+            <p>MAGYAR KIADÁS</p>
+            <button onclick="initGame()">JÁTÉK INDÍTÁSA</button>
+        </div>
+
+        <div id="game-over" class="overlay" style="display: none;">
+            <h1 style="color: #666;">JÁTÉK VÉGE</h1>
+            <button onclick="location.reload()">ÚJRAPRÓBÁLÁS</button>
+        </div>
+
+        <div id="win-screen" class="overlay" style="display: none;">
+            <h1 style="color: gold;">GYŐZELEM!</h1>
+            <p>Legyőzted a főgonoszt!</p>
+            <button onclick="location.reload()">ÚJ JÁTÉK</button>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+    </div>
 
     <script>
-        // --- JÁTÉK BEÁLLÍTÁSAI ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x5c94fc); // Mario égkék háttér
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
         
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        // Fények
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-        const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        sunLight.position.set(10, 20, 10);
-        scene.add(sunLight);
-
-        // --- 3. JAVÍTÁS: HÁTTÉR ÉS PÁLYA ---
-        // Talaj (zöld fű)
-        const groundGeo = new THREE.BoxGeometry(100, 2, 10);
-        const groundMat = new THREE.MeshPhongMaterial({ color: 0x228b22 });
-        const ground = new THREE.Mesh(groundGeo, groundMat);
-        ground.position.y = -1;
-        scene.add(ground);
-
-        // Akadályok (Kockák mint az első képen)
-        function createBlock(x, y, z) {
-            const blockGeo = new THREE.BoxGeometry(1, 1, 1);
-            const blockMat = new THREE.MeshPhongMaterial({ color: 0xff4500 }); // Téglavörös
-            const block = new THREE.Mesh(blockGeo, blockMat);
-            block.position.set(x, y, z);
-            scene.add(block);
-            return block;
+        // --- HANG GENERÁTOR (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSfx(freq, type, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
         }
-        const blocks = [createBlock(5, 2, 0), createBlock(6, 2, 0), createBlock(7, 2, 0)];
 
-        // --- 1. JAVÍTÁS: MARIO (HITBOX MEGEGYEZIK A MÉRETTEL) ---
-        const marioGroup = new THREE.Group();
-        
-        // Mario teste (piros kocka, de 3D-ben)
-        const bodyGeo = new THREE.BoxGeometry(0.8, 1, 0.8);
-        const bodyMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-        const body = new THREE.Mesh(bodyGeo, bodyMat);
-        marioGroup.add(body);
+        // --- JÁTÉK VÁLTOZÓK ---
+        let currentLevel = 1;
+        let score = 0;
+        let playerHp = 3;
+        let gameActive = false;
+        let cameraX = 0;
 
-        // Mario sapka (hogy lássuk merre néz)
-        const hatGeo = new THREE.BoxGeometry(0.8, 0.2, 0.4);
-        const hatMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-        const hat = new THREE.Mesh(hatGeo, hatMat);
-        hat.position.set(0, 0.5, 0.2); 
-        marioGroup.add(hat);
+        const player = {
+            x: 50, y: 300, w: 40, h: 40,
+            velX: 0, velY: 0, speed: 5,
+            jumping: false, facingRight: true
+        };
 
-        scene.add(marioGroup);
-        marioGroup.position.y = 0.5;
+        let platforms = [];
+        let enemies = [];
+        let boss = null;
 
-        // --- IRÁNYÍTÁS ÉS MOZGÁS ---
-        const keys = {};
-        window.addEventListener('keydown', (e) => keys[e.code] = true);
-        window.addEventListener('keyup', (e) => keys[e.code] = false);
-
-        let velocityY = 0;
-        let isJumping = false;
-        const speed = 0.15;
-
-        camera.position.z = 10;
-        camera.position.y = 3;
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Mozgás logika
-            if (keys['ArrowLeft'] || keys['KeyA']) {
-                marioGroup.position.x -= speed;
-                // --- 2. JAVÍTÁS: IRÁNY (Balra néz) ---
-                marioGroup.rotation.y = -Math.PI / 2;
-            }
-            if (keys['ArrowRight'] || keys['KeyD']) {
-                marioGroup.position.x += speed;
-                // --- 2. JAVÍTÁS: IRÁNY (Jobbra néz) ---
-                marioGroup.rotation.y = Math.PI / 2;
-            }
-
-            // Ugrás
-            if (keys['Space'] && !isJumping) {
-                velocityY = 0.25;
-                isJumping = true;
-            }
-
-            // Gravitáció
-            marioGroup.position.y += velocityY;
-            if (marioGroup.position.y > 0.5) {
-                velocityY -= 0.01;
+        // --- SZINTEK DEFINIÁLÁSA ---
+        function loadLevel(num) {
+            currentLevel = num;
+            player.x = 50;
+            player.y = 300;
+            cameraX = 0;
+            
+            if (num === 1) {
+                platforms = [
+                    {x: 0, y: 360, w: 1500, h: 40}, // Föld
+                    {x: 300, y: 260, w: 120, h: 30},
+                    {x: 550, y: 180, w: 120, h: 30},
+                    {x: 800, y: 260, w: 150, h: 30},
+                    {x: 1100, y: 200, w: 100, h: 30},
+                    {x: 1400, y: 0, w: 50, h: 400, goal: true} // Cél kapu
+                ];
+                enemies = [
+                    {x: 400, y: 320, w: 40, h: 40, speed: 2, startX: 400, range: 200},
+                    {x: 900, y: 320, w: 40, h: 40, speed: 2, startX: 900, range: 150}
+                ];
+                boss = null;
+                document.getElementById("boss-bar-container").style.display = "none";
             } else {
-                marioGroup.position.y = 0.5;
-                velocityY = 0;
-                isJumping = false;
+                // LEVEL 2 - BOSS FIGHT
+                platforms = [
+                    {x: 0, y: 360, w: 800, h: 40} // Kisebb aréna
+                ];
+                enemies = [];
+                boss = {
+                    x: 600, y: 260, w: 100, h: 100, 
+                    hp: 5, maxHp: 5, speed: 3, 
+                    dir: 1, jumpTimer: 0
+                };
+                document.getElementById("boss-bar-container").style.display = "block";
+                playSfx(100, 'sawtooth', 0.5); // Boss belépő hang
             }
+            document.getElementById("lvl-txt").innerText = currentLevel;
+        }
+
+        const keys = {};
+        window.addEventListener("keydown", e => { 
+            keys[e.code] = true; 
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+        });
+        window.addEventListener("keyup", e => keys[e.code] = false);
+
+        function initGame() {
+            document.getElementById("start-menu").style.display = "none";
+            loadLevel(1);
+            gameActive = true;
+            loop();
+        }
+
+        function loop() {
+            if (!gameActive) return;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        function update() {
+            // Mozgás
+            if (keys["ArrowRight"]) { player.velX = player.speed; player.facingRight = true; }
+            else if (keys["ArrowLeft"]) { player.velX = -player.speed; player.facingRight = false; }
+            else { player.velX = 0; }
+
+            if (keys["Space"] && !player.jumping) {
+                player.velY = -16;
+                player.jumping = true;
+                playSfx(400, 'square', 0.1); // Ugrás hang
+            }
+
+            player.velY += 0.8; // Gravitáció
+            player.x += player.velX;
+            player.y += player.velY;
 
             // Kamera követés
-            camera.position.x = marioGroup.position.x;
-            camera.lookAt(marioGroup.position);
+            if (currentLevel === 1) {
+                cameraX = player.x - 100;
+                if (cameraX < 0) cameraX = 0;
+            }
 
-            renderer.render(scene, camera);
+            // --- JAVÍTÁS 1: HITBOX & ÜTKÖZÉS ---
+            player.jumping = true;
+            platforms.forEach(p => {
+                if (player.x < p.x + p.w && player.x + player.w > p.x &&
+                    player.y < p.y + p.h && player.y + player.h > p.y) {
+                    
+                    if (p.goal) {
+                        playSfx(600, 'sine', 0.5);
+                        loadLevel(2);
+                    } else if (player.velY > 0) {
+                        player.jumping = false;
+                        player.y = p.y - player.h;
+                        player.velY = 0;
+                    }
+                }
+            });
+
+            // Ellenségek kezelése
+            enemies.forEach((en, index) => {
+                en.x += en.speed;
+                if (Math.abs(en.x - en.startX) > en.range) en.speed *= -1;
+
+                if (checkCollision(player, en)) {
+                    if (player.velY > 0 && player.y < en.y) { // Ráugrott
+                        enemies.splice(index, 1);
+                        player.velY = -10;
+                        score += 50;
+                        playSfx(200, 'sine', 0.1);
+                    } else {
+                        hurtPlayer();
+                    }
+                }
+            });
+
+            // --- BOSS LOGIKA ---
+            if (boss) {
+                boss.x += boss.speed * boss.dir;
+                if (boss.x < 100 || boss.x > 650) boss.dir *= -1;
+                
+                boss.jumpTimer++;
+                if (boss.jumpTimer > 100) {
+                    boss.y -= 10; // Kis ugrás a boss-nak
+                    boss.jumpTimer = 0;
+                }
+
+                if (checkCollision(player, boss)) {
+                    if (player.velY > 0 && player.y < boss.y + 20) {
+                        boss.hp--;
+                        player.velY = -12;
+                        playSfx(150, 'sawtooth', 0.2); // Boss sebződik hang
+                        document.getElementById("boss-bar").style.width = (boss.hp / boss.maxHp * 100) + "%";
+                        if (boss.hp <= 0) {
+                            gameActive = false;
+                            document.getElementById("win-screen").style.display = "flex";
+                        }
+                        // Boss bosszú: teleportál egyet
+                        boss.x = Math.random() * 600;
+                    } else {
+                        hurtPlayer();
+                    }
+                }
+            }
+
+            if (player.y > 500) hurtPlayer(); // Leesett
         }
 
-        animate();
+        function checkCollision(a, b) {
+            return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+        }
 
-        // Ablak átméretezés kezelése
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        function hurtPlayer() {
+            playerHp--;
+            playSfx(100, 'square', 0.3); // Sebződés hang
+            player.x = 50;
+            player.y = 200;
+            document.getElementById("hp-txt").innerText = playerHp;
+            if (playerHp <= 0) {
+                gameActive = false;
+                document.getElementById("game-over").style.display = "flex";
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(-cameraX, 0);
+
+            // Háttér hegyek (Javítás 3)
+            ctx.fillStyle = "#4b7bd1";
+            ctx.fillRect(cameraX * 0.5, 200, 200, 200);
+
+            // Platformok
+            platforms.forEach(p => {
+                ctx.fillStyle = p.goal ? "gold" : "#8b4513";
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                ctx.strokeStyle = "white";
+                ctx.strokeRect(p.x, p.y, p.w, p.h);
+            });
+
+            // Ellenségek
+            enemies.forEach(en => {
+                ctx.fillStyle = "#556b2f";
+                ctx.fillRect(en.x, en.y, en.w, en.h);
+            });
+
+            // Boss rajzolása
+            if (boss) {
+                ctx.fillStyle = "#4b0082";
+                ctx.fillRect(boss.x, boss.y, boss.w, boss.h);
+                ctx.fillStyle = "red";
+                ctx.fillRect(boss.x + 20, boss.y + 20, 20, 20); // Boss szeme
+                ctx.fillRect(boss.x + 60, boss.y + 20, 20, 20);
+            }
+
+            // --- JAVÍTÁS 2: MARIO IRÁNYA ---
+            ctx.fillStyle = "red";
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+            // Sapka sild (mutatja az irányt)
+            ctx.fillStyle = "black";
+            let sildX = player.facingRight ? player.x + 30 : player.x - 5;
+            ctx.fillRect(sildX, player.y + 5, 15, 5);
+
+            ctx.restore();
+            document.getElementById("coin-txt").innerText = score;
+        }
     </script>
 </body>
 </html>
