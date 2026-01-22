@@ -2,155 +2,138 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kris3DLab • Modelljei</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <title>3D Mario HTML5</title>
     <style>
-        :root { --green: #00ff88; --dark: #050505; --transition: all 0.4s ease; }
-        
-        body {
-            margin: 0; font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle at top, #063820, #000);
-            color: white; overflow-x: hidden;
-        }
-
-        /* Navigáció */
-        nav {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 5%; border-bottom: 1px solid var(--green);
-            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;
-        }
-
-        .nav-links button {
-            background: none; border: 1px solid var(--green); color: var(--green);
-            padding: 8px 15px; border-radius: 8px; cursor: pointer; margin-left: 5px;
-        }
-
-        .nav-links button:hover { background: var(--green); color: black; }
-
-        /* Szekciók Smooth animációval */
-        section { display: none; padding: 50px 5%; max-width: 1100px; margin: auto; }
-        section.active { display: block; animation: slideIn 0.5s ease forwards; }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Modellek Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .card {
-            background: rgba(14, 14, 14, 0.9); border: 1px solid var(--green);
-            border-radius: 20px; padding: 25px; text-align: center; transition: var(--transition);
-        }
-        .card:hover { transform: translateY(-10px); box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
-
-        /* Kosár tétel törléssel */
-        .cart-item {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #111; padding: 15px; border-radius: 12px; margin-bottom: 10px;
-            border-left: 5px solid var(--green); animation: pop 0.3s ease;
-        }
-        @keyframes pop { from { transform: scale(0.8); } to { transform: scale(1); } }
-
-        .del-btn { background: #ff4444; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; }
-
-        .btn {
-            width: 100%; padding: 15px; border: none; border-radius: 10px;
-            background: var(--green); color: black; font-weight: bold; cursor: pointer;
-        }
-
-        .contact-box {
-            border: 2px dashed var(--green); padding: 30px; border-radius: 20px;
-            text-align: center; margin-top: 40px;
+        body { margin: 0; overflow: hidden; background-color: #5c94fc; }
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            text-shadow: 2px 2px black;
         }
     </style>
 </head>
 <body>
+    <div id="ui">Mozgás: Nyilak / WASD | Ugrás: Space</div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<nav>
-    <div style="color: var(--green); font-size: 1.5rem;">Kris3DLab</div>
-    <div class="nav-links">
-        <button onclick="show('home')">Home</button>
-        <button onclick="show('models')">Modellek</button>
-        <button onclick="show('cart')">Kosár (<span id="cartCount">0</span>)</button>
-    </div>
-</nav>
-
-<section id="home" class="active">
-    <h1>Vágj bele a 3D-be!</h1>
-    <div class="contact-box">
-        <h3>EGYEDI MODELLT SZERETNÉL?</h3>
-        <p>Írj rám és megbeszéljük az árat!</p>
-        <p style="color: var(--green);">
-            YouTube: @kris3dlab<br>
-            Gmail: kris3dlab@gmail.com
-        </p>
-    </div>
-</section>
-
-<section id="models">
-    <h2>MODELL PACKOK</h2>
-    <div class="grid">
-        <div class="card">
-            <h3 style="color: #ffb000;">Magyar Brainrot Csomag</h3>
-            <p>7 darabos exkluzív mém pack.</p>
-            <div style="font-size: 1.5rem; margin: 15px 0;">4 500 Ft</div>
-            <button class="btn" onclick="addToCart('Magyar Brainrot Pack', 4500)">Kosárba</button>
-        </div>
-        <div class="card">
-            <h3>Basic Props Pack</h3>
-            <p>Alapvető kiegészítők Robloxhoz.</p>
-            <div style="font-size: 1.5rem; margin: 15px 0;">2 000 Ft</div>
-            <button class="btn" onclick="addToCart('Basic Props', 2000)">Kosárba</button>
-        </div>
-    </div>
-</section>
-
-<section id="cart">
-    <h2>A KOSARAD</h2>
-    <div id="cartList"></div>
-    <div id="total" style="text-align: right; font-size: 1.5rem; margin-top: 20px;"></div>
-    <button class="btn" style="margin-top: 20px;" onclick="alert('Irány a PayPal...')">FIZETÉS</button>
-</section>
-
-<script>
-    let cart = [];
-
-    function show(id) {
-        document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
-    function addToCart(name, price) {
-        cart.push({ id: Date.now(), name, price });
-        updateUI();
-    }
-
-    function removeFromCart(id) {
-        cart = cart.filter(item => item.id !== id);
-        updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById('cartCount').innerText = cart.length;
-        const list = document.getElementById('cartList');
-        const totalDiv = document.getElementById('total');
+    <script>
+        // --- JÁTÉK BEÁLLÍTÁSAI ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x5c94fc); // Mario égkék háttér
         
-        list.innerHTML = cart.length ? '' : '<p>Üres a kosarad.</p>';
-        let total = 0;
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Fények
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        sunLight.position.set(10, 20, 10);
+        scene.add(sunLight);
+
+        // --- 3. JAVÍTÁS: HÁTTÉR ÉS PÁLYA ---
+        // Talaj (zöld fű)
+        const groundGeo = new THREE.BoxGeometry(100, 2, 10);
+        const groundMat = new THREE.MeshPhongMaterial({ color: 0x228b22 });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.position.y = -1;
+        scene.add(ground);
+
+        // Akadályok (Kockák mint az első képen)
+        function createBlock(x, y, z) {
+            const blockGeo = new THREE.BoxGeometry(1, 1, 1);
+            const blockMat = new THREE.MeshPhongMaterial({ color: 0xff4500 }); // Téglavörös
+            const block = new THREE.Mesh(blockGeo, blockMat);
+            block.position.set(x, y, z);
+            scene.add(block);
+            return block;
+        }
+        const blocks = [createBlock(5, 2, 0), createBlock(6, 2, 0), createBlock(7, 2, 0)];
+
+        // --- 1. JAVÍTÁS: MARIO (HITBOX MEGEGYEZIK A MÉRETTEL) ---
+        const marioGroup = new THREE.Group();
         
-        cart.forEach(item => {
-            total += item.price;
-            list.innerHTML += `
-                <div class="cart-item">
-                    <span>${item.name} - ${item.price} Ft</span>
-                    <button class="del-btn" onclick="removeFromCart(${item.id})">Törlés</button>
-                </div>`;
+        // Mario teste (piros kocka, de 3D-ben)
+        const bodyGeo = new THREE.BoxGeometry(0.8, 1, 0.8);
+        const bodyMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        marioGroup.add(body);
+
+        // Mario sapka (hogy lássuk merre néz)
+        const hatGeo = new THREE.BoxGeometry(0.8, 0.2, 0.4);
+        const hatMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+        const hat = new THREE.Mesh(hatGeo, hatMat);
+        hat.position.set(0, 0.5, 0.2); 
+        marioGroup.add(hat);
+
+        scene.add(marioGroup);
+        marioGroup.position.y = 0.5;
+
+        // --- IRÁNYÍTÁS ÉS MOZGÁS ---
+        const keys = {};
+        window.addEventListener('keydown', (e) => keys[e.code] = true);
+        window.addEventListener('keyup', (e) => keys[e.code] = false);
+
+        let velocityY = 0;
+        let isJumping = false;
+        const speed = 0.15;
+
+        camera.position.z = 10;
+        camera.position.y = 3;
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Mozgás logika
+            if (keys['ArrowLeft'] || keys['KeyA']) {
+                marioGroup.position.x -= speed;
+                // --- 2. JAVÍTÁS: IRÁNY (Balra néz) ---
+                marioGroup.rotation.y = -Math.PI / 2;
+            }
+            if (keys['ArrowRight'] || keys['KeyD']) {
+                marioGroup.position.x += speed;
+                // --- 2. JAVÍTÁS: IRÁNY (Jobbra néz) ---
+                marioGroup.rotation.y = Math.PI / 2;
+            }
+
+            // Ugrás
+            if (keys['Space'] && !isJumping) {
+                velocityY = 0.25;
+                isJumping = true;
+            }
+
+            // Gravitáció
+            marioGroup.position.y += velocityY;
+            if (marioGroup.position.y > 0.5) {
+                velocityY -= 0.01;
+            } else {
+                marioGroup.position.y = 0.5;
+                velocityY = 0;
+                isJumping = false;
+            }
+
+            // Kamera követés
+            camera.position.x = marioGroup.position.x;
+            camera.lookAt(marioGroup.position);
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Ablak átméretezés kezelése
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
-        totalDiv.innerText = total > 0 ? `Összesen: ${total} Ft` : "";
-    }
-</script>
-
+    </script>
 </body>
 </html>
