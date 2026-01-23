@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Szuper Mario - Pro Kiadás (Kris Verzió)</title>
+    <title>Szuper Mario - Kris Pro Verzió (Teljes Javítás!)</title>
     <style>
         body { 
             margin: 0; 
-            background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 100%); 
+            background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 70%, #E0F6FF 100%); 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            height: 100vh; 
+            min-height: 100vh; 
             font-family: 'Segoe UI', Tahoma, sans-serif; 
             overflow: hidden; 
         }
@@ -21,14 +21,19 @@
             border-radius: 20px; 
             box-shadow: 0 0 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.1); 
             overflow: hidden; 
+            max-width: 100vw; 
+            max-height: 100vh; 
         }
         canvas { 
             display: block; 
             image-rendering: pixelated; 
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
+            width: 100%; 
+            height: 100%; 
+            max-width: 900px; 
+            max-height: 540px; 
         }
-        /* UI Javítva */
         #ui { 
             position: absolute; 
             top: 15px; 
@@ -36,22 +41,23 @@
             right: 20px; 
             display: flex; 
             justify-content: space-between; 
+            align-items: center; 
             color: #fff; 
             font-size: 24px; 
             font-weight: bold; 
             text-shadow: 3px 3px 0 #000; 
             pointer-events: none; 
             z-index: 10; 
-            background: rgba(0,0,0,0.3); 
-            padding: 10px 20px; 
-            border-radius: 15px; 
-            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.4); 
+            padding: 12px 24px; 
+            border-radius: 20px; 
+            backdrop-filter: blur(12px);
         }
-        #hearts { font-size: 28px; }
+        #hearts { font-size: 30px; }
         .screen { 
             position: absolute; 
             inset: 0; 
-            background: rgba(0,0,0,0.85); 
+            background: rgba(0,0,0,0.9); 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
@@ -59,558 +65,615 @@
             color: white; 
             z-index: 20; 
             text-align: center; 
-            backdrop-filter: blur(10px); 
-            animation: fadeIn 0.5s ease-out;
+            backdrop-filter: blur(15px); 
+            cursor: pointer;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .screen { animation: fadeIn 0.6s ease-out; }
         h1 { 
-            font-size: 60px; 
-            margin: 0 0 10px; 
-            background: linear-gradient(45deg, #ff4500, #ff8c00); 
+            font-size: clamp(40px, 8vw, 70px); 
+            margin: 0 0 15px; 
+            background: linear-gradient(45deg, #ff4500, #ff8c00, #ffd700); 
             -webkit-background-clip: text; 
             -webkit-text-fill-color: transparent; 
+            background-clip: text; 
             text-shadow: 4px 4px #000; 
             font-weight: 900;
         }
-        p { font-size: 24px; margin: 0 0 20px; }
+        p { font-size: clamp(18px, 4vw, 26px); margin: 0 0 25px; opacity: 0.95; }
         button { 
-            padding: 15px 40px; 
-            font-size: 26px; 
+            padding: 18px 50px; 
+            font-size: clamp(20px, 5vw, 28px); 
             cursor: pointer; 
             background: linear-gradient(45deg, #e52521, #ff4500); 
             color: white; 
-            border: 4px solid #fff; 
-            border-radius: 40px; 
-            margin-top: 10px; 
+            border: 5px solid #fff; 
+            border-radius: 50px; 
+            margin-top: 15px; 
             font-weight: bold; 
-            transition: all 0.3s; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            transition: all 0.3s ease; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            pointer-events: auto;
         }
         button:hover { 
-            transform: scale(1.15) rotate(2deg); 
+            transform: scale(1.2) rotate(5deg); 
             background: linear-gradient(45deg, #ff4500, #ff8c00); 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
         }
-        button:active { transform: scale(1.05) rotate(0); }
+        button:active { transform: scale(1.08) rotate(0); }
     </style>
 </head>
 <body>
 <div id="wrapper">
     <div id="ui">
         <div>SZINT: <span id="lvlDisplay">1</span></div>
-        <div id="powerLabel" style="color: #ffff00; text-transform: uppercase; font-size: 20px;"></div>
+        <div id="powerLabel" style="color: #ffff00; text-transform: uppercase; font-size: 22px;"></div>
         <div id="hearts">❤️❤️❤️</div>
-        <div style="font-size:20px">PONT: <span id="scDisplay">0</span></div>
+        <div>PONT: <span id="scDisplay">0</span></div>
     </div>
     <div id="menu" class="screen">
         <h1>🕹️ KRIS SUPER MARIO 🕹️</h1>
-        <p>A Legjobb Magyar Kaland! Győzd le a szinteket!</p>
-        <p>IRÁNYÍTÁS: Nyilak ⬅️➡️⬆️ (ugrás Space), F = Tűzgolyó</p>
-        <button onclick="startGame()">🚀 JÁTÉK INDÍTÁSA 🚀</button>
+        <p>Ultran Menő Magyar Kaland!</p>
+        <p>⬅️➡️ Nyilak | ⬆️ Space ugrás | F tűzgolyó</p>
+        <button id="startBtn">🚀 INDÍTSA EL A JÁTÉKOT! 🚀</button>
     </div>
     <div id="fail" class="screen" style="display:none">
-        <h1>💀 MEGHALTÁL 💀</h1>
-        <p>Próbáld újra, Kris!</p>
-        <button onclick="location.reload()">🔄 ÚJRAPRÓBÁLKOZÁS</button>
+        <h1>💀 GAME OVER 💀</h1>
+        <p>Kris, próbáld újra!</p>
+        <button onclick="location.reload()">🔄 ÚJRAKEZDÉS</button>
     </div>
     <div id="victory" class="screen" style="display:none">
-        <h1 style="color: gold; font-size:70px;">🏆 TÖKÉLETES GYŐZELEM! 🏆</h1>
-        <p>Mindenkit legyőztél! Te vagy a legjobb!</p>
+        <h1 style="color: gold; font-size: clamp(50px,10vw,80px);">🏆 LEGYŐZTED! 🏆</h1>
+        <p>Te vagy a Mario Királya!</p>
         <button onclick="location.reload()">🔄 ÚJ KALAND</button>
     </div>
-    <canvas id="c" width="900" height="540"></canvas> <!-- Nagyobb canvas -->
+    <canvas id="c"></canvas>
 </div>
 <script>
-const canvas = document.getElementById("c"), ctx = canvas.getContext("2d");
-ctx.imageSmoothingEnabled = false; // Pixel art stílus
-let active = false, currentLvl = 1, score = 0, hp = 3, cameraX = 0, frame = 0;
-const spawnPoints = [100, 100, 100]; // Szint spawn X
-// --- JÁTÉKOS ---
-const mario = {
-    x: 100, y: 300, w: 36, h: 52, vx: 0, vy: 0,
-    onGround: false, dir: 1, power: false, fireballs: [],
-    animFrame: 0
-};
-let platforms = [], enemies = [], items = [], clouds = [], hills = [];
-// --- GRAFIKA ÉS SZINTEK ---
-function buildLevel(n) {
-    platforms = []; enemies = []; items = []; clouds = []; hills = [];
-    mario.x = spawnPoints[n-1] || 100; mario.y = 350; cameraX = 0;
-    mario.power = false; document.getElementById("powerLabel").innerText = "";
-    updateHearts();
-    document.getElementById("lvlDisplay").innerText = n;
-    // Felhők (parallax)
-    for(let i = 0; i < 20; i++) {
-        clouds.push({x: i * 500 + Math.random()*300, y: 60 + Math.random()*120, size: 40 + Math.random()*30, speed: 0.4 + Math.random()*0.4});
+(function() {
+    'use strict';
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+    canvas.width = 900;
+    canvas.height = 540;
+    ctx.imageSmoothingEnabled = false;
+
+    let active = false, currentLvl = 1, score = 0, hp = 3, cameraX = 0, targetCameraX = 0, frame = 0;
+    const spawnPoints = [100, 100, 100];
+    const mario = {
+        x: 100, y: 300, w: 36, h: 52, vx: 0, vy: 0,
+        onGround: false, dir: 1, power: false, fireballs: [],
+        animFrame: 0
+    };
+    let platforms = [], enemies = [], items = [], clouds = [], hills = [];
+
+    // Hangok
+    let audioCtx = null;
+    function initAudio() {
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) { console.log('Audio nem támogatott'); }
     }
-    // DomboK (háttér parallax)
-    for(let i = 0; i < 12; i++) {
-        hills.push({x: i * 600 + Math.random()*400, w: 250 + Math.random()*200, h: 60 + Math.random()*40});
+    function playSfx(freq, type = 'square', duration = 0.1, vol = 0.1) {
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
     }
-    // Nagy talaj minden szinten alap
-    platforms.push({x: 0, y: 460, w: 5000, h: 80, type: 'ground'});
-    if (n === 1) {
-        // 1. szint: Blokkok sora, ellenségek, pipe
-        for(let i=400; i<900; i+=50) {
-            addBlock(i, 340, Math.random()>0.5 ? 'brick' : 'lucky');
-        }
-        addPipe(1100);
-        addEnemy(550, 420);
-        addEnemy(850, 420);
-        addEnemy(1250, 420);
-        addEnemy(1550, 420);
-        platforms.push({x: 2800, y: 120, w: 50, h: 340, type: 'goal'});
-    } else if (n === 2) {
-        // 2. szint: Szakadékok, ugró platformok
-        platforms = [{x: 0, y: 460, w: 1100, h: 80, type: 'ground'},
-                     {x: 1450, y: 460, w: 2000, h: 80, type: 'ground'}];
-        // Ugró platformok a szakadékban
-        addBlock(950, 400, 'brick');
-        addBlock(1050, 360, 'brick');
-        addBlock(1150, 320, 'brick');
-        addBlock(1250, 280, 'brick');
-        addBlock(1400, 280, 'lucky');
-        addPipe(1700);
-        addEnemy(1650, 420);
-        addEnemy(1950, 420);
-        addEnemy(2250, 420);
-        addEnemy(2550, 420);
-        platforms.push({x: 3300, y: 120, w: 50, h: 340, type: 'goal'});
-    } else {
-        // 3. szint: Boss aréna
-        platforms = [{x: 0, y: 460, w: 2500, h: 80, type: 'ground'}];
-        // Lépcső a boss előtt
-        addBlock(800, 400, 'brick');
-        addBlock(850, 350, 'brick');
-        addBlock(900, 300, 'brick');
-        addBlock(950, 250, 'lucky');
-        // Boss
-        enemies.push({x: 1600, y: 340, w: 120, h: 120, vx: -5, hp: 8, maxHp:8, type: 'boss', patrolMin: 1200, patrolMax: 2200});
-    }
-}
-function addBlock(x, y, type) { platforms.push({x, y, w: 48, h: 48, type, used: false}); }
-function addPipe(x) {
-    platforms.push({x: x-10, y: 460, w: 68, h: 60, type: 'pipe_bottom'});
-    platforms.push({x: x-10, y: 340, w: 68, h: 120, type: 'pipe'});
-}
-function addEnemy(x, y) { 
-    enemies.push({x, y, w: 42, h: 42, vx: -3.5 + Math.random()*1, patrolMin: x-150, patrolMax: x+150, type: 'goomba'}); 
-}
-// --- HANGOK Javítva ---
-const audio = new (window.AudioContext || window.webkitAudioContext)();
-function playSfx(freq, type = 'square', duration = 0.1, vol = 0.1) {
-    if (audio.state === 'suspended') audio.resume();
-    const osc = audio.createOscillator(), gain = audio.createGain();
-    osc.type = type;
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(vol, audio.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + duration);
-    osc.connect(gain);
-    gain.connect(audio.destination);
-    osc.start();
-    osc.stop(audio.currentTime + duration);
-}
-// Jump: playSfx(660, 'sine', 0.15);
-// Coin: 880
-// Stomp: 200
-// Die: 100
-// Fire: 800
-// --- IRÁNYÍTÁS ---
-const keys = {};
-window.onkeydown = e => { 
-    keys[e.code] = true; 
-    if(e.code === 'Space') e.preventDefault();
-};
-window.onkeyup = e => keys[e.code] = false;
-function startGame() {
-    document.getElementById("menu").style.display = "none";
-    buildLevel(1); 
-    active = true; 
-    loop();
-}
-function updateHearts() {
-    let hearts = '';
-    for(let i=0; i<3; i++) hearts += hp > i ? '❤️' : '💔';
-    document.getElementById("hearts").innerHTML = hearts;
-}
-function update() {
-    if (!active) return;
-    frame++;
-    mario.animFrame = (mario.animFrame + 1) % 40;
-    // Mozgás (finomabb gyorsulás)
-    if (keys["ArrowRight"]) { 
-        mario.vx = Math.min(mario.vx + 0.8, 8); 
-        mario.dir = 1; 
-    } else if (keys["ArrowLeft"]) { 
-        mario.vx = Math.max(mario.vx - 0.8, -8); 
-        mario.dir = -1; 
-    } else { 
-        mario.vx *= 0.85; 
-    }
-    // Ugrás
-    if (keys["Space"] && mario.onGround) {
-        mario.vy = -19; 
-        mario.onGround = false;
-        playSfx(660, 'sine', 0.15);
-    }
-    // Tűzgolyó
-    if (keys["KeyF"] && mario.power && mario.fireballs.length < 5) {
-        mario.fireballs.push({x: mario.x + (mario.dir > 0 ? 30 : 0), y: mario.y + 25, vx: mario.dir * 14, vy: -2 + Math.random()*2});
-        playSfx(800, 'sawtooth', 0.08);
-        keys["KeyF"] = false;
-    }
-    mario.vy += 1.0; // Gravitáció
-    mario.x += mario.vx;
-    mario.y += mario.vy;
-    // Kamera (középre igazítva)
-    cameraX = Math.max(0, Math.min(4500 - 900, mario.x - 450));
-    // Fizika & Ütközések (javítva: oldalsó + vertical)
-    mario.onGround = false;
-    platforms.forEach(p => {
-        if (mario.x < p.x + p.w && mario.x + mario.w > p.x &&
-            mario.y < p.y + p.h && mario.y + mario.h > p.y) {
-            // Alulról landolás
-            if (mario.vy > 0 && mario.y < p.y) {
-                mario.y = p.y - mario.h;
-                mario.vy = 0;
-                mario.onGround = true;
-            }
-            // Felülről ütközés
-            else if (mario.vy < 0 && mario.y > p.y) {
-                mario.y = p.y + p.h;
-                mario.vy = 0;
-                if (p.type === 'lucky' && !p.used) {
-                    p.used = true;
-                    items.push({x: p.x + 10, y: p.y - 45, type: 'mushroom'});
-                    playSfx(880, 'sine', 0.25);
-                }
-            }
-            // Oldalsó ütközések
-            else {
-                if (mario.vx > 0 && mario.x < p.x) {
-                    mario.x = p.x - mario.w;
-                    mario.vx = 0;
-                } else if (mario.vx < 0 && mario.x + mario.w > p.x + p.w) {
-                    mario.x = p.x + p.w;
-                    mario.vx = 0;
-                }
-            }
-            // Cél
-            if (p.type === 'goal') nextLvl();
-        }
-    });
-    // Items (filter safe)
-    items = items.filter(it => {
-        it.y += 1; // lebeg felfelé kicsit
-        if (mario.x < it.x + 32 && mario.x + mario.w > it.x &&
-            mario.y < it.y + 32 && mario.y + mario.h > it.y) {
-            mario.power = true;
-            document.getElementById("powerLabel").innerText = "🔥 TŰZ MARIO! 🔥";
-            playSfx(1000, 'sine', 0.4);
-            return false;
-        }
-        return it.y < 500;
-    });
-    // Ellenségek mozgás
-    enemies.forEach(en => {
-        en.x += en.vx;
-        if (en.type !== 'boss') {
-            if (en.x < en.patrolMin || en.x > en.patrolMax) en.vx *= -1;
+
+    initAudio();
+
+    // Szintek
+    function buildLevel(n) {
+        platforms = []; enemies = []; items = []; clouds = []; hills = [];
+        mario.x = spawnPoints[n-1] || 100; 
+        mario.y = 350; 
+        cameraX = 0; 
+        targetCameraX = 0;
+        mario.power = false; 
+        document.getElementById("powerLabel").innerText = "";
+        updateHearts();
+        document.getElementById("lvlDisplay").innerText = n;
+        // Felhők
+        for(let i = 0; i < 30; i++) clouds.push({
+            x: i * 450 + Math.random()*500, 
+            y: 60 + Math.random()*140, 
+            size: 40 + Math.random()*50, 
+            speed: 0.25 + Math.random()*0.45
+        });
+        // DomboK
+        for(let i = 0; i < 20; i++) hills.push({
+            x: i * 600 + Math.random()*400, 
+            w: 200 + Math.random()*250, 
+            h: 45 + Math.random()*55, 
+            speed: 0.4 + Math.random()*0.5
+        });
+        platforms.push({x: 0, y: 460, w: 6000, h: 80, type: 'ground'});
+        if (n === 1) {
+            for(let i = 420; i < 1000; i += 50) addBlock(i, 340, Math.random() > 0.5 ? 'brick' : 'lucky');
+            addPipe(1200);
+            addEnemy(600, 420); addEnemy(900, 420); addEnemy(1300, 420); addEnemy(1600, 420);
+            platforms.push({x: 2900, y: 120, w: 50, h: 340, type: 'goal'});
+        } else if (n === 2) {
+            platforms = [{x: 0, y: 460, w: 1200, h: 80, type: 'ground'}, {x: 1550, y: 460, w: 2500, h: 80, type: 'ground'}];
+            addBlock(1020, 400, 'brick'); addBlock(1120, 350, 'brick'); addBlock(1220, 300, 'brick'); addBlock(1320, 250, 'brick'); addBlock(1470, 280, 'lucky');
+            addPipe(1820);
+            addEnemy(1720, 420); addEnemy(2020, 420); addEnemy(2320, 420); addEnemy(2620, 420);
+            platforms.push({x: 3450, y: 120, w: 50, h: 340, type: 'goal'});
         } else {
-            if (en.x < en.patrolMin || en.x > en.patrolMax) en.vx *= -1;
+            platforms = [{x: 0, y: 460, w: 3000, h: 80, type: 'ground'}];
+            addBlock(850, 400, 'brick'); addBlock(910, 350, 'brick'); addBlock(970, 300, 'brick'); addBlock(1030, 250, 'lucky');
+            enemies.push({x: 1700, y: 340, w: 120, h: 120, vx: -5.5, hp: 10, maxHp: 10, type: 'boss', patrolMin: 1300, patrolMax: 2300});
         }
+    }
+    function addBlock(x, y, type) { platforms.push({x, y, w: 48, h: 48, type, used: false}); }
+    function addPipe(x) {
+        platforms.push({x: x-12, y: 460, w: 72, h: 65, type: 'pipe_bottom'});
+        platforms.push({x: x-12, y: 330, w: 72, h: 130, type: 'pipe'});
+    }
+    function addEnemy(x, y) { 
+        enemies.push({x, y, w: 42, h: 42, vx: -3.8 + Math.random()*0.8, patrolMin: x-200, patrolMax: x+200, type: 'goomba'}); 
+    }
+
+    // UI
+    function updateHearts() {
+        let hearts = '';
+        for(let i = 0; i < 3; i++) hearts += (hp > i ? '❤️' : '💔');
+        document.getElementById("hearts").innerHTML = hearts;
+    }
+
+    // Irányítás
+    const keys = {};
+    window.addEventListener('keydown', e => {
+        keys[e.code] = true;
+        if (e.code === 'Space') e.preventDefault();
     });
-    // Mario - ellenség ütközés (backward loop safe splice)
-    for (let i = enemies.length - 1; i >= 0; i--) {
-        const en = enemies[i];
-        if (mario.x < en.x + en.w && mario.x + mario.w > en.x &&
-            mario.y < en.y + en.h && mario.y + mario.h > en.y) {
-            if (mario.vy > 0 && mario.y < en.y + 15) { // Felülről stomp
-                if (en.type === 'boss') {
-                    en.hp--;
-                    mario.vy = -17;
-                    playSfx(150, 'sawtooth', 0.2);
-                    if (en.hp <= 0) {
-                        score += 5000;
-                        win();
+    window.addEventListener('keyup', e => keys[e.code] = false);
+
+    // Start gomb javítva!
+    document.getElementById('startBtn').addEventListener('click', startGame);
+
+    function startGame() {
+        console.log('Játék indul!'); // Debug
+        document.getElementById("menu").style.display = "none";
+        buildLevel(1);
+        active = true;
+        frame = 0;
+        score = 0;
+        hp = 3;
+        updateHearts();
+        document.getElementById("scDisplay").innerText = 0;
+        requestAnimationFrame(loop);
+    }
+
+    function update() {
+        if (!active) return;
+        frame++;
+        mario.animFrame = (mario.animFrame + 1) % 60;
+
+        // Mozgás (power boost)
+        const maxSpeed = mario.power ? 9.2 : 8.0;
+        if (keys["ArrowRight"]) {
+            mario.vx = Math.min(mario.vx + 0.9, maxSpeed);
+            mario.dir = 1;
+        } else if (keys["ArrowLeft"]) {
+            mario.vx = Math.max(mario.vx - 0.9, -maxSpeed);
+            mario.dir = -1;
+        } else {
+            mario.vx *= 0.82;
+        }
+
+        // Ugrás
+        if (keys["Space"] && mario.onGround) {
+            mario.vy = -19.5;
+            mario.onGround = false;
+            playSfx(659, 'sine', 0.18, 0.12);
+        }
+
+        // Tűz
+        if (keys["KeyF"] && mario.power && mario.fireballs.length < 7) {
+            mario.fireballs.push({
+                x: mario.x + (mario.dir > 0 ? 36 : -12), 
+                y: mario.y + 28, 
+                vx: mario.dir * 15.5, 
+                vy: -2 + Math.random() * 4
+            });
+            playSfx(784, 'sawtooth', 0.1, 0.15);
+            keys["KeyF"] = false;
+        }
+
+        mario.vy += 1.05;
+        mario.x += mario.vx;
+        mario.y += mario.vy;
+
+        // MENŐ KAMERA (lerp + smooth)
+        const idealCam = mario.x - 450;
+        targetCameraX = Math.max(0, Math.min(6000 - 900, idealCam));
+        cameraX += (targetCameraX - cameraX) * 0.16; // Optimális simaság!
+
+        // Parallax végtelen
+        clouds.forEach(c => {
+            c.x -= c.speed * 0.8;
+            if (c.x + c.size < cameraX - 300) c.x += 3000;
+        });
+        hills.forEach(h => {
+            h.x -= h.speed * 1.3;
+            if (h.x + h.w < cameraX - 400) h.x += 3500;
+        });
+
+        // Ütközések (biztonságos)
+        mario.onGround = false;
+        for (let pi = 0; pi < platforms.length; pi++) {
+            const p = platforms[pi];
+            if (mario.x + 4 < p.x + p.w - 4 && mario.x + mario.w - 4 > p.x + 4 &&
+                mario.y + 4 < p.y + p.h - 4 && mario.y + mario.h - 4 > p.y + 4) {
+                if (mario.vy > 0 && mario.y < p.y - 4) {
+                    mario.y = p.y - mario.h;
+                    mario.vy = 0;
+                    mario.onGround = true;
+                } else if (mario.vy < 0 && mario.y > p.y) {
+                    mario.y = p.y + p.h;
+                    mario.vy = 0;
+                    if (p.type === 'lucky' && !p.used) {
+                        p.used = true;
+                        items.push({x: p.x + 12, y: p.y - 50, type: 'mushroom'});
+                        playSfx(880, 'sine', 0.3, 0.15);
                     }
                 } else {
-                    enemies.splice(i, 1);
-                    mario.vy = -14;
-                    score += 200;
-                    playSfx(220, 'sine', 0.15);
+                    if (mario.vx > 0) { mario.x = p.x - mario.w; mario.vx = 0; }
+                    else if (mario.vx < 0) { mario.x = p.x + p.w; mario.vx = 0; }
                 }
-            } else {
-                die();
+                if (p.type === 'goal') nextLvl();
             }
         }
-    }
-    // Tűzgolyók (filter safe)
-    mario.fireballs = mario.fireballs.filter(fb => {
-        fb.x += fb.vx;
-        fb.y += fb.vy;
-        fb.vy += 0.6;
-        if (fb.y > 450) {
-            fb.vy *= -0.6; // bounce
-        }
-        // Ellenség hit
-        for (let ei = 0; ei < enemies.length; ei++) {
-            const en = enemies[ei];
-            if (fb.x < en.x + en.w && fb.x + 16 > en.x &&
-                fb.y < en.y + en.h && fb.y + 16 > en.y) {
-                if (en.type === 'boss') {
-                    en.hp -= 1;
-                    playSfx(300, 'sawtooth', 0.1);
-                } else {
-                    enemies.splice(ei, 1);
-                    score += 150;
-                }
+
+        // Items
+        items = items.filter(it => {
+            it.y += 0.9;
+            if (mario.x < it.x + 34 && mario.x + mario.w > it.x &&
+                mario.y < it.y + 34 && mario.y + mario.h > it.y) {
+                mario.power = true;
+                document.getElementById("powerLabel").innerText = "🔥 TŰZ MARIO! 🔥";
+                playSfx(1046, 'sine', 0.45, 0.2);
                 return false;
             }
+            return it.y < 500;
+        });
+
+        // Enemies update
+        for (let ei = 0; ei < enemies.length; ei++) {
+            const en = enemies[ei];
+            en.x += en.vx;
+            if (en.x < en.patrolMin || en.x > en.patrolMax) en.vx *= -1;
         }
-        return fb.x > cameraX - 100 && fb.x < cameraX + 1000;
-    });
-    // Halál
-    if (mario.y > 600) die();
-    document.getElementById("scDisplay").innerText = score;
-}
-function die() {
-    playSfx(80, 'square', 0.5);
-    hp--;
-    updateHearts();
-    if (hp <= 0) {
-        active = false;
-        document.getElementById("fail").style.display = "flex";
-    } else {
-        mario.x = cameraX + 80;
-        mario.y = 350;
-        mario.vx = 0; mario.vy = 0;
-        mario.power = false;
-        document.getElementById("powerLabel").innerText = "";
-        mario.fireballs = [];
-    }
-}
-function nextLvl() {
-    currentLvl++;
-    if (currentLvl > 3) win();
-    else {
-        playSfx(1200, 'sine', 0.5);
-        buildLevel(currentLvl);
-    }
-}
-function win() {
-    active = false;
-    score += 10000;
-    document.getElementById("victory").style.display = "flex";
-    playSfx(880, 'sine', 1.0);
-}
-function drawMario() {
-    const x = mario.x - cameraX, y = mario.y;
-    const footBob = mario.onGround && Math.abs(mario.vx) > 1 ? Math.sin(frame * 0.4) * 3 : 0;
-    // Sapka
-    ctx.fillStyle = mario.power ? '#ff8c00' : '#e31b23';
-    ctx.fillRect(x + 5, y + 1, 26, 14);
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 11px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('M', x + 18, y + 12);
-    // Fej
-    ctx.fillStyle = '#ffdbac';
-    ctx.fillRect(x + 7, y + 15, 22, 18);
-    // Szemek (dir alapján)
-    ctx.fillStyle = 'black';
-    const eye1 = mario.dir > 0 ? x + 18 : x + 10;
-    const eye2 = mario.dir > 0 ? x + 23 : x + 15;
-    ctx.fillRect(eye1, y + 21, 4, 4);
-    ctx.fillRect(eye2, y + 21, 4, 4);
-    // Bajusz
-    ctx.fillRect(x + 11, y + 28, 14, 4);
-    // Overall
-    ctx.fillStyle = mario.power ? '#ffd700' : '#d81e05';
-    ctx.fillRect(x + 3, y + 29, 30, 18);
-    // Gombok
-    ctx.fillStyle = 'yellow';
-    ctx.fillRect(x + 10, y + 33, 6, 6);
-    ctx.fillRect(x + 20, y + 33, 6, 6);
-    // Kesztyűk
-    ctx.fillStyle = 'white';
-    ctx.fillRect(x + 1, y + 33, 8, 10);
-    ctx.fillRect(x + 27, y + 33, 8, 10);
-    // Cipők (anim)
-    ctx.fillStyle = '#8b4513';
-    ctx.fillRect(x + 4 + (footBob > 0 ? 2 : 0), y + 44 + Math.abs(footBob), 11, 8);
-    ctx.fillRect(x + 21 - (footBob > 0 ? 2 : 0), y + 44 - Math.abs(footBob), 11, 8);
-    ctx.textAlign = 'left';
-}
-function drawGoomba(en) {
-    const ex = en.x - cameraX, ey = en.y;
-    // Test (ovál hatású)
-    ctx.fillStyle = '#654321';
-    ctx.fillRect(ex + 4, ey + 8, 34, 28);
-    ctx.fillStyle = '#8b7355';
-    ctx.fillRect(ex + 6, ey + 10, 30, 24);
-    // Szemek
-    ctx.fillStyle = 'white';
-    ctx.fillRect(ex + 10, ey + 14, 8, 8);
-    ctx.fillRect(ex + 24, ey + 14, 8, 8);
-    ctx.fillStyle = 'black';
-    ctx.fillRect(ex + 12, ey + 16, 4, 4);
-    ctx.fillRect(ex + 26, ey + 16, 4, 4);
-    // Lábak (séta anim)
-    const legFrame = Math.floor(frame / 10) % 2;
-    ctx.fillStyle = '#5c4033';
-    ctx.fillRect(ex + 8, ey + 32, 6, 10 - legFrame * 3);
-    ctx.fillRect(ex + 28, ey + 32, 6, 10 + legFrame * 3);
-}
-function drawBoss(en) {
-    const bx = en.x - cameraX, by = en.y;
-    // Test (nagy barna/sötét)
-    ctx.fillStyle = '#4b0082';
-    ctx.fillRect(bx, by + 20, 120, 100);
-    ctx.fillStyle = '#663399';
-    ctx.fillRect(bx + 10, by + 25, 100, 80);
-    // Szem
-    ctx.fillStyle = 'yellow';
-    ctx.fillRect(bx + 40, by + 35, 40, 25);
-    ctx.fillStyle = 'black';
-    ctx.fillRect(bx + 50, by + 42, 20, 12);
-    // Tüske
-    ctx.fillStyle = '#8b4513';
-    ctx.beginPath();
-    ctx.moveTo(bx + 60, by + 20);
-    ctx.lineTo(bx + 80, by + 5);
-    ctx.lineTo(bx + 100, by + 20);
-    ctx.fill();
-    // HP bar
-    ctx.fillStyle = 'red';
-    ctx.fillRect(bx, by - 15, 120, 8);
-    ctx.fillStyle = 'lime';
-    ctx.fillRect(bx, by - 15, 120 * (en.hp / en.maxHp), 8);
-}
-function render() {
-    ctx.clearRect(0, 0, 900, 540);
-    ctx.save();
-    ctx.translate(-cameraX, 0);
-    // DomboK
-    ctx.fillStyle = '#228b22';
-    ctx.strokeStyle = '#006400';
-    ctx.lineWidth = 2;
-    hills.forEach(h => {
-        const hx = h.x - cameraX * 0.3;
-        ctx.beginPath();
-        ctx.moveTo(hx, 460);
-        ctx.quadraticCurveTo(hx + h.w / 2, 460 - h.h, hx + h.w, 460);
-        ctx.stroke();
-        ctx.fill();
-    });
-    // Platformok (javított design)
-    platforms.forEach(p => {
-        const px = p.x, py = p.y;
-        if (p.type === 'ground' || p.type === 'grass') {
-            // Föld textúra
-            ctx.fillStyle = '#8b4513';
-            ctx.fillRect(px, py, p.w, p.h);
-            ctx.fillStyle = '#228b22';
-            ctx.fillRect(px, py, p.w, 20);
-            // Fűszálak
-            ctx.fillStyle = '#006400';
-            for(let i = 0; i < p.w; i += 8) {
-                ctx.fillRect(px + i, py - 2 + Math.sin(frame * 0.1 + i) * 1, 4, 8);
-            }
-        } else if (p.type === 'brick') {
-            ctx.fillStyle = '#cd853f';
-            ctx.fillRect(px, py, p.w, p.h);
-            ctx.strokeStyle = '#8b4513';
-            ctx.lineWidth = 2;
-            for(let i = 0; i < 2; i++) {
-                for(let j = 0; j < 2; j++) {
-                    ctx.strokeRect(px + i * 24, py + j * 24, 23, 23);
+
+        // Mario-enemy coll (safe loop backward)
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const en = enemies[i];
+            if (mario.x < en.x + en.w && mario.x + mario.w > en.x &&
+                mario.y < en.y + en.h && mario.y + mario.h > en.y) {
+                if (mario.vy > 0.5 && mario.y < en.y + 20) {
+                    if (en.type === 'boss') {
+                        en.hp--;
+                        mario.vy = -18;
+                        playSfx(165, 'sawtooth', 0.25, 0.18);
+                        if (en.hp <= 0) {
+                            score += 10000;
+                            win();
+                            return;
+                        }
+                    } else {
+                        enemies.splice(i, 1);
+                        mario.vy = -15;
+                        score += 300;
+                        playSfx(220, 'sine', 0.2, 0.12);
+                    }
+                } else {
+                    die();
+                    return;
                 }
             }
-        } else if (p.type === 'lucky') {
-            const glow = 200 + Math.sin(frame * 0.15) * 55;
-            ctx.fillStyle = `hsl(${glow/2}, 100%, 50%)`;
-            ctx.fillRect(px, py, p.w, p.h);
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 28px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('?', px + 24, py + 24);
-        } else if (p.type === 'pipe') {
-            ctx.fillStyle = '#006400';
-            ctx.fillRect(px, py, p.w, p.h);
-            ctx.fillStyle = '#228b22';
-            ctx.fillRect(px + 8, py, p.w - 16, p.h);
-        } else if (p.type === 'pipe_bottom') {
-            ctx.fillStyle = '#004d00';
-            ctx.fillRect(px, py, p.w, p.h);
-            ctx.fillStyle = '#228b22';
-            ctx.fillRect(px + 12, py - 8, p.w - 24, 12);
-        } else if (p.type === 'goal') {
-            // Zászlórúd
-            ctx.fillStyle = '#a52a2a';
-            ctx.fillRect(px - 15, py, 15, p.h);
-            // Zászló (leng)
-            const flagY = py + 30 + Math.sin(frame * 0.1) * 15;
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.moveTo(px, flagY);
-            ctx.lineTo(px - 35, flagY + 20);
-            ctx.lineTo(px, flagY + 10);
-            ctx.fill();
-            ctx.fillStyle = 'black';
-            ctx.fillRect(px - 10, py + 10, 60, 20);
         }
-    });
-    // Items (gomba)
-    items.forEach(it => {
-        const ix = it.x, iy = it.y;
-        // Gombatest
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        ctx.ellipse(ix + 16, iy + 12, 14, 10, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#ff4444';
-        ctx.beginPath();
-        ctx.ellipse(ix + 16, iy + 12, 10, 7, 0, 0, Math.PI * 2);
-        ctx.fill();
-        // Szár
-        ctx.fillStyle = 'white';
-        ctx.fillRect(ix + 14, iy + 20, 8, 12);
-    });
-    // Ellenségek
-    enemies.forEach(en => {
-        if (en.type === 'goomba') drawGoomba(en);
-        else drawBoss(en);
-    });
-    // Tűzgolyók
-    mario.fireballs.forEach(fb => {
-        const fx = fb.x - cameraX, fy = fb.y;
-        ctx.fillStyle = 'orange';
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = 'red';
-        ctx.beginPath();
-        ctx.arc(fx + 8, fy + 8, 10, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        // Csík
-        ctx.strokeStyle = 'yellow';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(fx + 8, fy + 8);
-        ctx.lineTo(fx + 8 - fb.vx * 0.5, fy + 8 - fb.vy * 0.5);
-        ctx.stroke();
-    });
-    // Mario
-    drawMario();
-    ctx.restore();
-}
-function loop() {
-    if (!active) return;
-    update();
-    render();
-    requestAnimationFrame(loop);
-}
+
+        // Fireballs (safe filter)
+        mario.fireballs = mario.fireballs.filter(fb => {
+            fb.x += fb.vx;
+            fb.y += fb.vy;
+            fb.vy += 0.7;
+            if (fb.y > 460) fb.vy *= -0.7;
+            for (let ei = 0; ei < enemies.length; ei++) {
+                const en = enemies[ei];
+                if (fb.x < en.x + en.w && fb.x + 18 > en.x &&
+                    fb.y < en.y + en.h && fb.y + 18 > en.y) {
+                    if (en.type === 'boss') {
+                        en.hp -= 1.5;
+                        playSfx(349, 'sawtooth', 0.15);
+                    } else {
+                        enemies.splice(ei, 1);
+                        score += 200;
+                    }
+                    return false;
+                }
+            }
+            return fb.x > cameraX - 200 && fb.x < cameraX + 1100;
+        });
+
+        if (mario.y > 650) die();
+        document.getElementById("scDisplay").innerText = score;
+    }
+
+    function die() {
+        playSfx(80, 'square', 0.6, 0.25);
+        hp--;
+        updateHearts();
+        if (hp <= 0) {
+            active = false;
+            setTimeout(() => document.getElementById("fail").style.display = "flex", 500);
+        } else {
+            mario.x = 150;
+            mario.y = 350;
+            mario.vx = 0;
+            mario.vy = 0;
+            mario.power = false;
+            document.getElementById("powerLabel").innerText = "";
+            mario.fireballs = [];
+            cameraX = 0;
+            targetCameraX = 0;
+        }
+    }
+
+    function nextLvl() {
+        currentLvl++;
+        if (currentLvl > 3) {
+            win();
+        } else {
+            playSfx(1318, 'sine', 0.6, 0.2);
+            buildLevel(currentLvl);
+        }
+    }
+
+    function win() {
+        active = false;
+        score += 25000;
+        setTimeout(() => document.getElementById("victory").style.display = "flex", 800);
+        playSfx(988, 'sine', 1.2, 0.3);
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Parallax 1: Távoli felhők
+        ctx.save();
+        ctx.translate(-cameraX * 0.2, 0);
+        clouds.forEach(c => {
+            const alpha = 0.6 + Math.sin(frame * 0.04 + c.x * 0.005) * 0.25;
+            ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, c.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(c.x - c.size / 3, c.y - 8, c.size / 3.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(c.x + c.size / 4, c.y - 4, c.size / 2.4, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.restore();
+
+        // Parallax 2: DomboK
+        ctx.save();
+        ctx.translate(-cameraX * 0.48, 0);
+        hills.forEach(h => {
+            ctx.fillStyle = '#32cd32';
+            ctx.strokeStyle = '#228b22';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(h.x, 460);
+            ctx.quadraticCurveTo(h.x + h.w / 2, 460 - h.h, h.x + h.w, 460);
+            ctx.fill();
+            ctx.stroke();
+        });
+        ctx.restore();
+
+        // Fő layer
+        ctx.save();
+        ctx.translate(-cameraX, 0);
+
+        // Platformok
+        platforms.forEach(p => {
+            const px = p.x, py = p.y;
+            if (p.type === 'ground') {
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(px, py, p.w, p.h);
+                ctx.fillStyle = '#228b22';
+                ctx.fillRect(px, py, p.w, 22);
+                ctx.fillStyle = '#006400';
+                for (let i = 0; i < p.w; i += 10) {
+                    ctx.fillRect(px + i, py - 4 + Math.sin(frame * 0.12 + i * 0.08) * 2, 5, 12);
+                }
+            } else if (p.type === 'brick') {
+                ctx.fillStyle = '#cd853f';
+                ctx.fillRect(px, py, p.w, p.h);
+                ctx.strokeStyle = '#8b4513';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(px + 4, py + 4, p.w - 8, p.h - 8);
+                ctx.strokeRect(px + 22, py + 22, p.w - 44, p.h - 44);
+            } else if (p.type === 'lucky') {
+                const glow = 210 + Math.sin(frame * 0.2) * 60;
+                ctx.fillStyle = `hsl(${glow / 2.5}, 100%, 45%)`;
+                ctx.shadowColor = `hsl(${glow / 2}, 100%, 60%)`;
+                ctx.shadowBlur = 15;
+                ctx.fillRect(px, py, p.w, p.h);
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 30px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('?', px + 24, py + 24);
+            } else if (p.type === 'pipe') {
+                ctx.fillStyle = '#006400';
+                ctx.fillRect(px, py, p.w, p.h);
+                ctx.fillStyle = '#228b22';
+                ctx.fillRect(px + 10, py + 4, p.w - 20, p.h - 8);
+            } else if (p.type === 'pipe_bottom') {
+                ctx.fillStyle = '#004d00';
+                ctx.fillRect(px, py, p.w, p.h);
+                ctx.fillStyle = '#228b22';
+                ctx.fillRect(px + 14, py - 10, p.w - 28, 16);
+            } else if (p.type === 'goal') {
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(px - 20, py, 20, p.h);
+                const flagAnim = Math.sin(frame * 0.22) * 20;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.moveTo(px, py + 40);
+                ctx.quadraticCurveTo(px - 50, py + 40 + flagAnim, px - 40, py + 65 + flagAnim * 0.6);
+                ctx.lineTo(px, py + 75);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.fillRect(px - 15, py + 45, 65, 22);
+            }
+        });
+
+        // Items
+        items.forEach(it => {
+            const ix = it.x, iy = it.y;
+            ctx.shadowColor = '#ff6666';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.ellipse(ix + 16, iy + 16, 18, 13, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ff4444';
+            ctx.beginPath();
+            ctx.ellipse(ix + 16, iy + 16, 12, 9, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(ix + 14, iy + 25, 10, 16);
+        });
+
+        // Enemies
+        enemies.forEach(en => {
+            if (en.type === 'goomba') {
+                const ex = en.x, ey = en.y;
+                const bob = Math.sin(frame * 0.4 + en.x * 0.01) * 5;
+                ctx.fillStyle = '#5d4037';
+                ctx.fillRect(ex + 5, ey + 8 + bob * 0.3, 32, 30);
+                ctx.fillStyle = '#8b7355';
+                ctx.fillRect(ex + 7, ey + 10 + bob * 0.3, 28, 26);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(ex + 11, ey + 14 + bob * 0.3, 10, 10);
+                ctx.fillRect(ex + 21, ey + 14 + bob * 0.3, 10, 10);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(ex + 14, ey + 17 + bob * 0.3, 5, 5);
+                ctx.fillRect(ex + 24, ey + 17 + bob * 0.3, 5, 5);
+                ctx.fillStyle = '#4a362a';
+                ctx.fillRect(ex + 9, ey + 36 + bob, 8, 14 - bob);
+                ctx.fillRect(ex + 25, ey + 36 - bob, 8, 14 + bob);
+            } else {
+                const bx = en.x, by = en.y;
+                ctx.fillStyle = '#4b0082';
+                ctx.fillRect(bx + 12, by + 22, 96, 98);
+                ctx.fillStyle = '#7b2cbf';
+                ctx.fillRect(bx + 22, by + 28, 76, 78);
+                ctx.fillStyle = '#ffd700';
+                ctx.fillRect(bx + 38, by + 38, 44, 32);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(bx + 52, by + 48, 16, 14);
+                ctx.fillStyle = '#d2691e';
+                ctx.beginPath();
+                ctx.moveTo(bx + 55, by + 22);
+                ctx.lineTo(bx + 75, by + 2);
+                ctx.lineTo(bx + 95, by + 22);
+                ctx.fill();
+                // HP bar
+                ctx.fillStyle = '#222';
+                ctx.fillRect(bx + 12, by - 18, 96, 14);
+                const hpPercent = en.hp / en.maxHp;
+                ctx.fillStyle = hpPercent > 0.5 ? '#00ff00' : hpPercent > 0.2 ? '#ffaa00' : '#ff0000';
+                ctx.fillRect(bx + 12, by - 18, 96 * hpPercent, 14);
+            }
+        });
+
+        // Fireballs
+        mario.fireballs.forEach(fb => {
+            const fx = fb.x, fy = fb.y;
+            ctx.save();
+            ctx.shadowColor = '#ff4500';
+            ctx.shadowBlur = 25;
+            ctx.fillStyle = 'rgba(255, 165, 0, 0.6)';
+            ctx.beginPath();
+            ctx.arc(fx + 9 - fb.vx * 0.4, fy + 9 - fb.vy * 0.4, 16, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ff4500';
+            ctx.beginPath();
+            ctx.arc(fx + 9, fy + 9, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.restore();
+        });
+
+        // Mario (szuper anim)
+        const mx = mario.x, my = mario.y;
+        const runBob = (mario.onGround && Math.abs(mario.vx) > 2) ? Math.sin(frame * 0.5) * 5 : 0;
+        const jumpSquash = mario.vy > 0 ? Math.min(mario.vy * 0.1, 3) : 0;
+        // Sapka
+        ctx.fillStyle = mario.power ? '#ff8c00' : '#e31b23';
+        ctx.fillRect(mx + 5, my + 3 + runBob * 0.6 - jumpSquash, 26, 15);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('M', mx + 18, my + 11 + runBob * 0.6 - jumpSquash);
+        // Fej
+        ctx.fillStyle = '#ffdbac';
+        ctx.fillRect(mx + 7, my + 18 - jumpSquash, 22, 21 + jumpSquash * 0.5);
+        // Szemek
+        ctx.fillStyle = '#000';
+        ctx.fillRect(mario.dir > 0 ? mx + 20 : mx + 10, my + 24 + runBob * 0.3, 5, 6);
+        // Bajusz
+        ctx.fillRect(mx + 12, my + 32 + runBob * 0.4, 12, 5);
+        // Test
+        ctx.fillStyle = mario.power ? '#ffd700' : '#c41e3a';
+        ctx.fillRect(mx + 3, my + 34 + runBob * 0.5, 30, 19);
+        // Gombok
+        ctx.fillStyle = '#ffff00';
+        ctx.fillRect(mx + 10, my + 38 + runBob * 0.5, 7, 7);
+        ctx.fillRect(mx + 19, my + 38 + runBob * 0.5, 7, 7);
+        // Kesztyű
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(mx + (mario.dir > 0 ? 1 : 27), my + 36 + runBob * 0.5, 9, 13);
+        // Cipők
+        ctx.fillStyle = '#8b4513';
+        const footOffset = mario.dir > 0 ? runBob : -runBob;
+        ctx.fillRect(mx + 6 + footOffset, my + 49 + Math.abs(runBob) * 0.2, 11, 11);
+        ctx.fillRect(mx + 19 - footOffset, my + 49 - Math.abs(runBob) * 0.2, 11, 11);
+
+        ctx.restore();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+    }
+
+    function loop() {
+        if (active) {
+            update();
+            render();
+        }
+        requestAnimationFrame(loop);
+    }
+})();
 </script>
 </body>
 </html>
