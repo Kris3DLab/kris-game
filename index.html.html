@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vonatos Játék</title>
+    <style>
+        canvas { border: 2px solid black; background-color: #eee; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Képek betöltése (Cseréld le a saját fájljaidra!)
+        const bgImg = new Image();
+        bgImg.src = 'hatter.png'; 
+
+        const trainImg = new Image();
+        trainImg.src = 'vonat.png';
+
+        const policeImg = new Image();
+        policeImg.src = 'rendor.png';
+
+        // Változók
+        let bgX = 0;
+        let trainX = 900;
+        let policeX = 50;
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // --- 3. JAVÍTÁS: MOZGÓ HÁTTÉR ---
+            bgX -= 2; // Háttér sebessége
+            if (bgX <= -canvas.width) bgX = 0;
+            
+            ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
+            ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, canvas.height);
+
+            // --- 1. JAVÍTÁS: VONAT HITBOX ---
+            // A vonat kirajzolása és az ütközéshez a kép saját méreteit használjuk
+            ctx.drawImage(trainImg, trainX, 250);
+            
+            // Hitbox adatok (csak a logikához)
+            let trainHitbox = {
+                x: trainX,
+                y: 250,
+                width: trainImg.width,  // Pontosan akkora, mint a kép
+                height: trainImg.height
+            };
+
+            // --- 2. JAVÍTÁS: RENDŐR MEGFORDÍTÁSA ---
+            ctx.save(); // Elmentjük az állapotot
+            // Megfordítjuk a koordináta-rendszert a rendőrnél
+            ctx.translate(policeX + 50, 0); 
+            ctx.scale(-1, 1); // Vízszintes tükrözés
+            ctx.drawImage(policeImg, 0, 280, 50, 50); 
+            ctx.restore(); // Visszaállítjuk, hogy a többi ne legyen fordítva
+
+            // Mozgás
+            trainX -= 5;
+            if (trainX < -200) trainX = 850;
+
+            requestAnimationFrame(draw);
+        }
+
+        // Akkor indul a játék, ha a képek betöltődtek
+        bgImg.onload = () => {
+            draw();
+        };
+    </script>
+</body>
+</html>
