@@ -2,323 +2,316 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Mario - Teljes Magyar Játék</title>
+    <title>Szuper Mario - A Teljes Játék</title>
     <style>
-        body { margin: 0; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Arial', sans-serif; overflow: hidden; }
-        #container { position: relative; width: 800px; height: 400px; border: 4px solid #fff; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        canvas { display: block; background: #5c94fc; }
+        body { margin: 0; background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Arial', sans-serif; overflow: hidden; }
+        #game-container { position: relative; width: 800px; height: 450px; border: 4px solid #fff; background: #5c94fc; overflow: hidden; }
+        canvas { display: block; }
         
-        .screen {
+        /* UI és Menük */
+        .overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.8);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             color: white; z-index: 100; text-align: center;
         }
-        h1 { font-size: 50px; color: #ff4500; margin: 0; text-shadow: 3px 3px #fff; }
-        button { padding: 15px 30px; font-size: 20px; cursor: pointer; background: #e52521; color: white; border: none; margin-top: 20px; font-weight: bold; }
         #hud {
-            position: absolute; top: 10px; left: 10px; right: 10px;
-            color: white; font-size: 20px; display: flex; justify-content: space-between;
-            pointer-events: none; text-shadow: 2px 2px #000;
+            position: absolute; top: 0; left: 0; width: 100%; padding: 10px;
+            display: flex; justify-content: space-around; color: white;
+            font-weight: bold; font-size: 20px; text-shadow: 2px 2px #000; pointer-events: none;
         }
+        button { padding: 15px 30px; font-size: 20px; cursor: pointer; background: #e52521; color: white; border: none; font-weight: bold; margin-top: 15px; }
+        button:hover { background: #ff4500; }
     </style>
 </head>
 <body>
 
-<div id="container">
+<div id="game-container">
     <div id="hud">
-        <div>SZINT: <span id="lvlDisplay">1</span></div>
-        <div id="powerMsg" style="color: yellow; font-weight: bold;"></div>
-        <div>ÉLET: <span id="hpDisplay">3</span> | PONT: <span id="scoreDisplay">0</span></div>
+        <div>PÁLYA: <span id="lvl">1</span></div>
+        <div>ÉLET: <span id="hp">3</span></div>
+        <div>PONT: <span id="score">0</span></div>
     </div>
 
-    <div id="startScreen" class="screen">
-        <h1>SUPER MARIO</h1>
-        <p>MAGYAR KIADÁS</p>
-        <p style="font-size: 14px;">NYILAK: Mozgás | SPACE: Ugrás | F: Tűzgolyó</p>
-        <button onclick="startGame()">JÁTÉK INDÍTÁSA</button>
+    <div id="start-screen" class="overlay">
+        <h1>SZUPER MARIO</h1>
+        <p>A TELJES KALAND</p>
+        <button onclick="startGame()">INDÍTÁS</button>
     </div>
 
-    <div id="gameOverScreen" class="screen" style="display:none">
-        <h1>JÁTÉK VÉGE</h1>
+    <div id="game-over" class="overlay" style="display:none">
+        <h1>VESZTETTÉL</h1>
         <button onclick="location.reload()">ÚJRAPRÓBÁLÁS</button>
     </div>
 
-    <div id="winScreen" class="screen" style="display:none">
-        <h1 style="color: gold;">GYŐZELEM!</h1>
-        <p>Megmentetted a hercegnőt!</p>
-        <button onclick="location.reload()">ÚJ JÁTÉK</button>
+    <div id="win-screen" class="overlay" style="display:none">
+        <h1 style="color: gold;">GRATULÁLUNK!</h1>
+        <p>Legyőzted a Boss-t és megmentetted a birodalmat!</p>
+        <button onclick="location.reload()">FŐMENÜ</button>
     </div>
 
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <canvas id="canvas" width="800" height="450"></canvas>
 </div>
 
 <script>
-/** @type {HTMLCanvasElement} */
-const canvas = document.getElementById("gameCanvas");
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-// --- HANG GENERÁTOR ---
-const audio = new (window.AudioContext || window.webkitAudioContext)();
-function sfx(f, type, d) {
-    const o = audio.createOscillator(), g = audio.createGain();
-    o.type = type; o.frequency.value = f;
-    o.connect(g); g.connect(audio.destination);
-    g.gain.setValueAtTime(0.1, audio.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + d);
-    o.start(); o.stop(audio.currentTime + d);
-}
-
-// --- JÁTÉK BEÁLLÍTÁSOK ---
+// --- JÁTÉK MOTOR ADATOK ---
 let gameRunning = false;
-let currentLvl = 1;
+let currentLevel = 1;
 let score = 0;
 let lives = 3;
-let camX = 0;
-let frame = 0;
+let cameraX = 0;
+let worldWidth = 2500; // A pálya tényleges hossza
 
 const player = {
-    x: 100, y: 200, w: 32, h: 48,
-    vx: 0, vy: 0, jumping: false,
-    facing: 1, power: false, fireballs: []
+    x: 100, y: 300, w: 35, h: 50,
+    vx: 0, vy: 0, speed: 5,
+    jumping: false, facing: 1,
+    power: false, fireballs: []
 };
 
-let map = [];
+let platforms = [];
 let enemies = [];
-let items = [];
+let luckyBlocks = [];
+let fireFlowers = [];
 
-// --- PÁLYA GENERÁLÁS ---
-function loadLevel(lvl) {
-    map = []; enemies = []; items = []; player.fireballs = [];
-    player.x = 50; player.y = 200; camX = 0;
-    document.getElementById("lvlDisplay").innerText = lvl;
-
-    const groundY = 350;
-    // Alap talaj mindenhol
-    map.push({x: 0, y: groundY, w: 3000, h: 50, type: 'ground'});
+// --- PÁLYA TERVEZÉS ---
+function setupLevel(lvl) {
+    platforms = []; enemies = []; luckyBlocks = []; fireFlowers = [];
+    player.x = 50; player.y = 300; cameraX = 0;
+    document.getElementById("lvl").innerText = lvl;
 
     if (lvl === 1) {
-        // Első szint: Alapok
-        addLucky(400, 220);
-        addBlock(600, 220, 'brick');
-        addBlock(640, 220, 'brick');
-        addBlock(680, 220, 'lucky');
-        addEnemy(700, groundY - 40);
-        addBlock(2000, 0, 40, 400, 'goal');
+        worldWidth = 2000;
+        addRect(0, 400, 2500, 50, "ground"); // Alap
+        addLucky(400, 250);
+        addRect(600, 250, 120, 40, "brick");
+        addLucky(800, 150);
+        addEnemy(700, 360);
+        addEnemy(1200, 360);
+        addRect(1900, 100, 20, 300, "goal"); // Céloszlop
     } else if (lvl === 2) {
-        // Második szint: Több ugrás
-        addBlock(300, 250, 'brick');
-        addLucky(500, 180);
-        addBlock(700, 250, 'brick');
-        addEnemy(500, groundY - 40);
-        addEnemy(1200, groundY - 40);
-        addBlock(1800, 0, 40, 400, 'goal');
+        worldWidth = 2500;
+        addRect(0, 400, 1000, 50, "ground");
+        addRect(1200, 400, 1500, 50, "ground"); // Szakadék középen!
+        addRect(400, 250, 200, 40, "brick");
+        addLucky(1300, 200);
+        addEnemy(1500, 360);
+        addRect(2400, 100, 20, 300, "goal");
     } else {
-        // Boss szint
-        map.push({x: 400, y: 200, w: 200, h: 20, type: 'brick'});
-        enemies.push({x: 700, y: groundY - 80, w: 80, h: 80, vx: -3, hp: 5, type: 'boss', startX: 700});
+        // BOSS FIGHT ARENA
+        worldWidth = 800;
+        addRect(0, 400, 800, 50, "ground");
+        enemies.push({ x: 600, y: 300, w: 80, h: 100, vx: -4, type: "boss", hp: 5, startX: 600 });
     }
 }
 
-function addBlock(x, y, type) { map.push({x, y, w: 40, h: 40, type}); }
-function addLucky(x, y) { map.push({x, y, w: 40, h: 40, type: 'lucky', used: false}); }
+function addRect(x, y, w, h, type) { platforms.push({x, y, w, h, type}); }
+function addLucky(x, y) { luckyBlocks.push({x, y, w: 40, h: 40, used: false}); }
 function addEnemy(x, y) { enemies.push({x, y, w: 40, h: 40, vx: -2, startX: x, range: 200}); }
 
-// --- RAJZOLÁS ---
-function drawPlayer() {
-    ctx.save();
-    ctx.translate(player.x - camX, player.y);
-    if (player.facing === -1) { ctx.scale(-1, 1); ctx.translate(-player.w, 0); }
-
-    const mainColor = player.power ? "#fff" : "#e52521";
-    const subColor = player.power ? "#e52521" : "#0055ff";
-
-    // Test (nem csak egy kocka)
-    ctx.fillStyle = subColor; ctx.fillRect(4, 20, 24, 20); // Nadrág
-    ctx.fillStyle = mainColor; ctx.fillRect(4, 8, 24, 15); // Ruha
-    
-    // Fej
-    ctx.fillStyle = "#ffccaa"; ctx.fillRect(8, -8, 18, 18); // Arc
-    ctx.fillStyle = "black"; ctx.fillRect(20, -2, 4, 4); // Szem
-    ctx.fillStyle = mainColor; ctx.fillRect(4, -12, 26, 8); // Sapka
-    
-    // Animált lábak
-    ctx.fillStyle = "#5d2906";
-    let legStep = Math.sin(frame * 0.2) * 8;
-    if (player.vx !== 0 && !player.jumping) {
-        ctx.fillRect(4, 40, 10, 8 + legStep);
-        ctx.fillRect(18, 40, 10, 8 - legStep);
-    } else {
-        ctx.fillRect(4, 40, 10, 8); ctx.fillRect(18, 40, 10, 8);
-    }
-    ctx.restore();
+// --- HANG EFFEKTEK ---
+const audio = new (window.AudioContext || window.webkitAudioContext)();
+function playSfx(freq, type, dur) {
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = type; o.frequency.value = freq;
+    o.connect(g); g.connect(audio.destination);
+    g.gain.setValueAtTime(0.1, audio.currentTime);
+    o.start(); o.stop(audio.currentTime + dur);
 }
 
-function drawMap() {
-    map.forEach(b => {
-        let x = b.x - camX;
-        if (b.type === 'ground') {
-            ctx.fillStyle = "#228b22"; ctx.fillRect(x, b.y, b.w, b.h);
-            ctx.fillStyle = "#8b4513"; ctx.fillRect(x, b.y + 10, b.w, b.h - 10);
-        } else if (b.type === 'brick') {
-            ctx.fillStyle = "#a52a2a"; ctx.fillRect(x, b.y, b.w, b.h);
-            ctx.strokeStyle = "#000"; ctx.strokeRect(x, b.y, b.w, b.h);
-        } else if (b.type === 'lucky') {
-            ctx.fillStyle = b.used ? "#777" : "#ffd700";
-            ctx.fillRect(x, b.y, b.w, b.h);
-            if (!b.used) { ctx.fillStyle = "#fff"; ctx.font = "bold 25px Arial"; ctx.fillText("?", x + 12, b.y + 30); }
-        } else if (b.type === 'goal') {
-            ctx.fillStyle = "white"; ctx.fillRect(x, b.y, b.w, b.h);
-            ctx.fillStyle = "red"; ctx.fillRect(x, b.y + (frame % 100), b.w, 20);
-        }
-    });
-}
-
-// --- JÁTÉK LOGIKA ---
+// --- IRÁNYÍTÁS ---
 const keys = {};
-window.onkeydown = (e) => { keys[e.code] = true; if(audio.state === 'suspended') audio.resume(); };
-window.onkeyup = (e) => keys[e.code] = false;
+window.onkeydown = e => { keys[e.code] = true; if(audio.state==='suspended') audio.resume(); };
+window.onkeyup = e => keys[e.code] = false;
 
 function startGame() {
-    document.getElementById("startScreen").style.display = "none";
-    loadLevel(1);
+    document.getElementById("start-screen").style.display = "none";
+    setupLevel(1);
     gameRunning = true;
-    update();
+    loop();
 }
 
+// --- FŐ CIKLUS ---
 function update() {
     if (!gameRunning) return;
-    frame++;
 
-    // Irányítás
-    if (keys["ArrowRight"]) { player.vx = 5; player.facing = 1; }
-    else if (keys["ArrowLeft"]) { player.vx = -5; player.facing = -1; }
+    // Mozgás
+    if (keys["ArrowRight"]) { player.vx = player.speed; player.facing = 1; }
+    else if (keys["ArrowLeft"]) { player.vx = -player.speed; player.facing = -1; }
     else { player.vx = 0; }
 
-    if (keys["Space"] && !player.jumping) { player.vy = -16; player.jumping = true; sfx(400, 'square', 0.1); }
+    if (keys["Space"] && !player.jumping) {
+        player.vy = -16; player.jumping = true;
+        playSfx(400, 'square', 0.1);
+    }
 
-    // Tűzgolyó lövés (F billentyű)
+    // Tűzgolyó
     if (keys["KeyF"] && player.power) {
         if (player.fireballs.length < 3) {
-            player.fireballs.push({x: player.x + 20, y: player.y + 20, vx: player.facing * 8, vy: 4});
-            sfx(600, 'sine', 0.1);
+            player.fireballs.push({x: player.x + 20, y: player.y + 10, vx: player.facing * 8, vy: 2});
+            playSfx(600, 'sine', 0.1);
         }
         keys["KeyF"] = false;
     }
 
-    // Fizika
-    player.vy += 0.8;
+    player.vy += 0.8; // Gravitáció
     player.x += player.vx;
     player.y += player.vy;
-    if (player.x < camX) player.x = camX;
 
-    camX = player.x - 200;
-    if (camX < 0) camX = 0;
+    // Kamera követés (megáll a pálya végén)
+    cameraX = player.x - 200;
+    if (cameraX < 0) cameraX = 0;
+    if (cameraX > worldWidth - 800) cameraX = worldWidth - 800;
 
-    // Ütközés és Hitbox javítás
+    // --- ÜTKÖZÉSEK ---
     player.jumping = true;
-    map.forEach(b => {
-        if (rectIntersect(player, b)) {
-            // Talajra érkezés
-            if (player.vy > 0 && player.y + player.h - player.vy <= b.y) {
-                player.y = b.y - player.h; player.vy = 0; player.jumping = false;
-                if (b.type === 'goal') nextLevel();
+    platforms.forEach(p => {
+        if (checkRect(player, p)) {
+            if (p.type === "goal") {
+                nextLevel();
+            } else if (player.vy > 0 && player.y < p.y) {
+                player.jumping = false; player.y = p.y - player.h; player.vy = 0;
+            } else if (player.vy < 0 && player.y > p.y) {
+                player.y = p.y + p.h; player.vy = 0;
             }
-            // Alulról fejelés
-            else if (player.vy < 0 && player.y - player.vy >= b.y + b.h) {
-                player.y = b.y + b.h; player.vy = 0;
-                if (b.type === 'lucky' && !b.used) {
-                    b.used = true; sfx(500, 'sawtooth', 0.2);
-                    items.push({x: b.x + 5, y: b.y - 35, w: 30, h: 30, type: 'flower'});
-                }
-            }
-            // Oldalsó fal
-            else if (player.vx > 0) player.x = b.x - player.w;
-            else if (player.vx < 0) player.x = b.x + b.w;
         }
     });
 
-    // Szupererő felvétele
-    items.forEach((it, i) => {
-        if (rectIntersect(player, it)) {
-            player.power = true; items.splice(i, 1); sfx(800, 'sine', 0.5);
-            document.getElementById("powerMsg").innerText = "TŰZVIRÁG AKTÍV! (F gomb)";
+    // Szerencseblokk
+    luckyBlocks.forEach(b => {
+        if (checkRect(player, b) && player.vy < 0 && player.y > b.y) {
+            if (!b.used) {
+                b.used = true;
+                fireFlowers.push({x: b.x + 5, y: b.y - 40, w: 30, h: 30});
+                playSfx(500, 'sawtooth', 0.2);
+            }
+            player.vy = 2;
         }
     });
 
-    // Tűzgolyók
-    player.fireballs.forEach((fb, i) => {
-        fb.x += fb.vx; fb.y += fb.vy;
-        if (fb.y > 340) fb.vy *= -1; // Pattog
-        enemies.forEach((en, ei) => {
-            if (rectIntersect(fb, en)) {
-                if (en.type === 'boss') { en.hp--; fb.x = -1000; sfx(150, 'sawtooth', 0.2); }
-                else { enemies.splice(ei, 1); fb.x = -1000; sfx(300, 'sine', 0.1); score += 100; }
-            }
-        });
-        if (fb.x > camX + 800 || fb.x < camX) player.fireballs.splice(i, 1);
+    // Powerup felvétel
+    fireFlowers.forEach((f, i) => {
+        if (checkRect(player, f)) {
+            player.power = true;
+            fireFlowers.splice(i, 1);
+            playSfx(800, 'sine', 0.3);
+        }
     });
 
     // Ellenségek
     enemies.forEach((en, i) => {
         en.x += en.vx;
-        if (en.type !== 'boss' && Math.abs(en.x - en.startX) > 200) en.vx *= -1;
-        if (en.type === 'boss' && (en.x < 400 || en.x > 720)) en.vx *= -1;
+        if (en.type !== "boss" && Math.abs(en.x - en.startX) > 200) en.vx *= -1;
+        if (en.type === "boss" && (en.x < 100 || en.x > 650)) en.vx *= -1;
 
-        if (rectIntersect(player, en)) {
+        if (checkRect(player, en)) {
             if (player.vy > 0 && player.y < en.y) {
-                if (en.type === 'boss') { en.hp--; player.vy = -12; if(en.hp<=0) win(); }
-                else { enemies.splice(i, 1); player.vy = -12; score += 50; sfx(200, 'sine', 0.1); }
+                if (en.type === "boss") {
+                    en.hp--; player.vy = -12;
+                    if (en.hp <= 0) winGame();
+                } else {
+                    enemies.splice(i, 1); player.vy = -12; score += 100;
+                }
             } else {
-                die();
+                takeDamage();
             }
         }
     });
 
-    if (player.y > 450) die();
+    // Tűzgolyók mozgatása
+    player.fireballs.forEach((fb, i) => {
+        fb.x += fb.vx;
+        enemies.forEach((en, ei) => {
+            if (checkRect(fb, en)) {
+                if (en.type === "boss") en.hp -= 0.5;
+                else enemies.splice(ei, 1);
+                player.fireballs.splice(i, 1);
+                score += 50;
+            }
+        });
+        if (fb.x < cameraX || fb.x > cameraX + 800) player.fireballs.splice(i, 1);
+    });
 
-    render();
-    requestAnimationFrame(update);
+    if (player.y > 500) takeDamage();
 }
 
-function rectIntersect(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+function checkRect(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 
-function die() {
-    lives--; sfx(100, 'square', 0.5);
-    document.getElementById("hpDisplay").innerText = lives;
-    if (lives <= 0) { gameRunning = false; document.getElementById("gameOverScreen").style.display = "flex"; }
-    else { player.x = camX + 50; player.y = 100; player.power = false; document.getElementById("powerMsg").innerText = ""; }
+function takeDamage() {
+    lives--;
+    playSfx(150, 'square', 0.4);
+    if (lives <= 0) {
+        gameRunning = false;
+        document.getElementById("game-over").style.display = "flex";
+    } else {
+        player.x = cameraX + 50; player.y = 100; player.power = false;
+        document.getElementById("hp").innerText = lives;
+    }
 }
 
 function nextLevel() {
-    currentLvl++;
-    if (currentLvl > 3) win();
-    else loadLevel(currentLvl);
+    currentLevel++;
+    if (currentLevel > 3) winGame();
+    else setupLevel(currentLvl = currentLevel);
 }
 
-function win() { gameRunning = false; document.getElementById("winScreen").style.display = "flex"; }
+function winGame() {
+    gameRunning = false;
+    document.getElementById("win-screen").style.display = "flex";
+}
 
-function render() {
+function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Felhők
-    ctx.fillStyle = "white";
-    ctx.beginPath(); ctx.arc(200 - camX*0.2, 100, 30, 0, 7); ctx.arc(230 - camX*0.2, 100, 40, 0, 7); ctx.fill();
-    
-    drawMap();
-    items.forEach(it => {
-        ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(it.x - camX + 15, it.y + 15, 15, 0, 7); ctx.fill();
-        ctx.fillStyle = "red"; ctx.beginPath(); ctx.arc(it.x - camX + 15, it.y + 15, 8, 0, 7); ctx.fill();
+    ctx.save();
+    ctx.translate(-cameraX, 0);
+
+    // Rajzolás: Felhők
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.fillRect(cameraX + 100, 50, 80, 40);
+    ctx.fillRect(cameraX + 400, 80, 100, 50);
+
+    // Rajzolás: Blokkok
+    platforms.forEach(p => {
+        ctx.fillStyle = p.type === "ground" ? "#228b22" : (p.type === "brick" ? "#a52a2a" : "white");
+        ctx.fillRect(p.x, p.y, p.w, p.h);
     });
+
+    luckyBlocks.forEach(b => {
+        ctx.fillStyle = b.used ? "#777" : "#ffd700";
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        if(!b.used) { ctx.fillStyle="#000"; ctx.fillText("?", b.x+15, b.y+25); }
+    });
+
+    fireFlowers.forEach(f => {
+        ctx.fillStyle = "orange"; ctx.beginPath(); ctx.arc(f.x+15, f.y+15, 15, 0, 7); ctx.fill();
+    });
+
     enemies.forEach(en => {
-        ctx.fillStyle = en.type === 'boss' ? "#4b0082" : "#8b4513";
-        ctx.fillRect(en.x - camX, en.y, en.w, en.h);
-        ctx.fillStyle = "white"; ctx.fillRect(en.x - camX + 5, en.y + 10, 10, 10);
+        ctx.fillStyle = en.type === "boss" ? "purple" : "#8b4513";
+        ctx.fillRect(en.x, en.y, en.w, en.h);
     });
+
     player.fireballs.forEach(fb => {
-        ctx.fillStyle = "orange"; ctx.beginPath(); ctx.arc(fb.x - camX, fb.y, 8, 0, 7); ctx.fill();
+        ctx.fillStyle = "red"; ctx.beginPath(); ctx.arc(fb.x, fb.y, 8, 0, 7); ctx.fill();
     });
-    drawPlayer();
-    document.getElementById("scoreDisplay").innerText = score;
+
+    // Játékos rajzolása (Animált hatás nélkül is látszik az irány)
+    ctx.fillStyle = player.power ? "white" : "red";
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    ctx.fillStyle = "black";
+    let eyeX = player.facing === 1 ? player.x + 22 : player.x + 5;
+    ctx.fillRect(eyeX, player.y + 10, 8, 8);
+
+    ctx.restore();
+    document.getElementById("score").innerText = score;
+}
+
+function loop() {
+    update();
+    draw();
+    if (gameRunning) requestAnimationFrame(loop);
 }
 </script>
 </body>
