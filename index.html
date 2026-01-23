@@ -3,453 +3,709 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🕹️ KRIS SUPER MARIO - ULTIMATE REMAKE 🏆</title>
+    <title>🕹️ KRIS SUPER MARIO - NERFED BOSS (NO CHASE) 🏆</title>
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin:0; padding:0; }
         body { 
-            margin: 0; padding: 0; background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 50%, #E0F6FF 100%); 
-            display: flex; justify-content: center; align-items: center; min-height: 100vh; 
-            font-family: 'Segoe UI', Tahoma, sans-serif; overflow: hidden; 
+            background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 50%, #E0F6FF 100%);
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, sans-serif; overflow: hidden;
         }
-        #wrapper { 
-            position: relative; border: 10px solid #444; border-radius: 25px; 
-            box-shadow: 0 0 80px rgba(0,0,0,0.9), inset 0 0 30px rgba(255,255,255,0.15); 
+        #wrapper {
+            position: relative; border: 10px solid #444; border-radius: 25px;
+            box-shadow: 0 0 80px rgba(0,0,0,0.9), inset 0 0 30px rgba(255,255,255,0.15);
             overflow: hidden; max-width: 95vw; max-height: 95vh;
         }
         canvas { 
-            display: block; width: 100%; height: 100%; 
+            display: block; width: 100%; height: 100%;
             image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;
         }
-        #ui { 
-            position: absolute; top: 20px; left: 25px; right: 25px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            color: #fff; font-size: 26px; font-weight: 900; text-shadow: 4px 4px 0 #000; 
-            pointer-events: none; z-index: 15; background: rgba(0,0,0,0.5); padding: 15px 30px; 
-            border-radius: 25px; backdrop-filter: blur(20px); border: 3px solid rgba(255,255,255,0.3);
+        #ui {
+            position: absolute; top: 20px; left: 25px; right: 25px; z-index: 15;
+            display: flex; justify-content: space-between; align-items: center;
+            color: white; font-size: 26px; font-weight: 900; text-shadow: 4px 4px 0 #000;
+            background: rgba(0,0,0,0.5); padding: 15px 30px; border-radius: 25px;
+            backdrop-filter: blur(20px); border: 3px solid rgba(255,255,255,0.3);
+            pointer-events: none;
         }
         #hearts { font-size: 32px; }
-        #powerLabel { color: #ffff00 !important; font-size: 22px; text-shadow: 2px 2px #000; }
-        .screen { 
-            position: absolute; inset: 0; background: rgba(0,0,0,0.95); 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            color: white; z-index: 25; text-align: center; backdrop-filter: blur(20px); 
-            cursor: pointer; transition: all 0.4s ease;
+        #powerLabel { color: #ffff00; font-size: 22px; }
+        .screen {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.95);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: white; z-index: 25; text-align: center; backdrop-filter: blur(20px);
         }
-        @keyframes glowPulse { 0%,100% { filter: drop-shadow(0 0 20px #ff4500); } 50% { filter: drop-shadow(0 0 40px #ff8c00); } }
-        .screen { animation: fadeIn 0.7s ease-out, glowPulse 2s infinite; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        h1 { 
-            font-size: clamp(45px, 10vw, 80px); margin: 0 0 20px; 
-            background: linear-gradient(45deg, #ff4500, #ff8c00, #ffd700); 
-            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; 
-            text-shadow: 5px 5px #000; font-weight: 1000;
+        h1 { font-size: clamp(50px, 10vw, 90px); margin: 0 0 20px;
+             background: linear-gradient(45deg, #ff4500, #ff8c00, #ffd700);
+             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+             text-shadow: 5px 5px #000; font-weight: 900; }
+        p { font-size: clamp(20px, 4vw, 28px); margin: 10px 0 30px; }
+        button {
+            padding: 18px 50px; font-size: 26px; cursor: pointer;
+            background: linear-gradient(45deg, #e52521, #ff4500);
+            color: white; border: 5px solid white; border-radius: 50px;
+            font-weight: bold; transition: all 0.3s;
         }
-        p { font-size: clamp(20px, 4.5vw, 28px); margin: 0 0 30px; opacity: 0.98; }
-        button { 
-            padding: 20px 60px; font-size: clamp(22px, 5.5vw, 30px); cursor: pointer; 
-            background: linear-gradient(45deg, #e52521, #ff4500, #ff8c00); color: white; 
-            border: 6px solid #fff; border-radius: 60px; font-weight: bold; 
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
-            box-shadow: 0 12px 30px rgba(0,0,0,0.6); pointer-events: auto;
-        }
-        button:hover { 
-            transform: scale(1.25) rotate(8deg) translateY(-10px); 
-            background: linear-gradient(45deg, #ff4500, #ffd700); 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
-        }
-        button:active { transform: scale(1.1) rotate(0) translateY(0); }
-        #victory h1 { color: gold !important; font-size: clamp(55px,12vw,90px) !important; }
+        button:hover { transform: scale(1.15); background: #ff8c00; }
     </style>
 </head>
 <body>
 <div id="wrapper">
     <div id="ui">
-        <div>🌟 SZINT: <span id="lvlDisplay">1</span></div>
+        <div>SZINT: <span id="lvlDisplay">1</span></div>
         <div id="powerLabel"></div>
         <div id="hearts">❤️❤️❤️</div>
-        <div>⭐ PONT: <span id="scDisplay">0</span></div>
+        <div>PONT: <span id="scDisplay">0</span></div>
     </div>
+
     <div id="menu" class="screen">
-        <h1>🕹️ KRIS SUPER MARIO REMAKE 🕹️</h1>
-        <p>Ultimate Boss Remodel + Zero Bug Kaland!</p>
-        <p>⬅️➡️ Nyilak | Space ugrás | F 🔥 Tűz</p>
-        <button id="startBtn">🚀 ULTRA INDÍTÁS! 🚀</button>
+        <h1>KRIS SUPER MARIO</h1>
+        <p>IRÁNYÍTÁS: nyilak • SPACE ugrás • F tűzgolyó</p>
+        <button id="startBtn">JÁTÉK INDÍTÁSA</button>
     </div>
+
     <div id="fail" class="screen" style="display:none">
-        <h1>💀 BOSS LEGYŐZött TÉGED 💀</h1>
-        <p>Kris, gyere vissza erősebben!</p>
-        <button onclick="location.reload()">🔥 ÚJRA CSATÁZNI! 🔥</button>
+        <h1>GAME OVER</h1>
+        <button onclick="location.reload()">ÚJRA PRÓBÁLOM</button>
     </div>
+
     <div id="victory" class="screen" style="display:none">
-        <h1>👑 BOSS REMAKE GYŐZELEM! 👑</h1>
-        <p>Te vagy a LEGJOBB Mario!</p>
-        <button onclick="location.reload()">🌟 ÚJ REMAKE! 🌟</button>
+        <h1>GRATULÁLOK! GYŐZTÉL!</h1>
+        <button onclick="location.reload()">ÚJ JÁTÉK</button>
     </div>
+
     <canvas id="c"></canvas>
 </div>
+
 <script>
-(function() {
-    'use strict';
-    const canvas = document.getElementById('c');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 960;
-    canvas.height = 576;
-    ctx.imageSmoothingEnabled = false;
+// ==================== JAVASCRIPT RÉSZ ====================
 
-    // Változók
-    let active = false, currentLvl = 1, score = 0, hp = 3, cameraX = 0, targetCameraX = 0, frame = 0;
-    const spawnPoints = [120, 120, 120];
-    const mario = { x: 120, y: 380, w: 40, h: 56, vx: 0, vy: 0, onGround: false, dir: 1, power: false, fireballs: [], animFrame: 0 };
-    let platforms = [], enemies = [], items = [], clouds = [], hills = [], bossFireballs = [];
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = 960;
+canvas.height = 576;
+ctx.imageSmoothingEnabled = false;
 
-    // Audio (javított safe)
-    let audioCtx;
-    function initAudio() {
-        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+let active = false;
+let currentLvl = 1;
+let score = 0;
+let hp = 3;
+let cameraX = 0;
+let targetCameraX = 0;
+let frame = 0;
+
+const mario = {
+    x: 120, y: 380, w: 40, h: 56,
+    vx: 0, vy: 0, onGround: false, dir: 1,
+    power: false, fireballs: [],
+    fireCooldown: 0,   // ← új: tűzgolyó cooldown
+    animFrame: 0
+};
+
+let platforms = [];
+let enemies = [];
+let items = [];
+let clouds = [];
+let hills = [];
+let bossFireballs = [];
+
+let audioCtx;
+function initAudio() {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) {}
+}
+function playSfx(freq, type='square', duration=0.12, volume=0.12) {
+    if (!audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+}
+initAudio();
+
+function buildLevel(n) {
+    platforms = []; enemies = []; items = []; clouds = []; hills = []; bossFireballs = [];
+    mario.x = 120; mario.y = 380; mario.power = false; mario.fireballs = [];
+    mario.fireCooldown = 0;
+    cameraX = targetCameraX = 0;
+    document.getElementById('powerLabel').innerText = '';
+    document.getElementById('lvlDisplay').innerText = n;
+    updateHearts();
+
+    // parallax háttér
+    for(let i = 0; i < 35; i++) {
+        clouds.push({x: i*420 + Math.random()*450, y: 70 + Math.random()*130,
+                     size: 45 + Math.random()*55, speed: 0.2 + Math.random()*0.4});
     }
-    function playSfx(f, type='square', dur=0.12, vol=0.12) {
-        if (!audioCtx || audioCtx.state === 'suspended') { audioCtx?.resume(); return; }
-        try {
-            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-            o.type = type; o.frequency.value = f;
-            g.gain.setValueAtTime(vol, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
-            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + dur);
-        } catch(e) {}
+    for(let i = 0; i < 22; i++) {
+        hills.push({x: i*580 + Math.random()*420, w: 240 + Math.random()*220,
+                    h: 55 + Math.random()*60, speed: 0.35 + Math.random()*0.45});
     }
-    initAudio();
 
-    // Szintek (remodelled hosszabb szintek)
-    function buildLevel(n) {
-        platforms = []; enemies = []; items = []; clouds = []; hills = []; bossFireballs = [];
-        mario.x = spawnPoints[n-1] || 120; mario.y = 380; cameraX = targetCameraX = 0;
-        mario.power = false; mario.fireballs = []; document.getElementById('powerLabel').innerText = '';
-        updateHearts(); document.getElementById('lvlDisplay').innerText = n;
-        // Parallax elemek (több, végtelen)
-        for(let i=0; i<35; i++) clouds.push({x: i*420 + Math.random()*450, y: 70+Math.random()*130, size: 45+Math.random()*55, speed: 0.2+Math.random()*0.4});
-        for(let i=0; i<22; i++) hills.push({x: i*580 + Math.random()*420, w: 240+Math.random()*220, h: 55+Math.random()*60, speed: 0.35+Math.random()*0.45});
-        platforms.push({x:0, y:488, w:7000, h:88, type:'ground'}); // Hosszabb világ
-        if(n===1) {
-            for(let i=450; i<1200; i+=55) addBlock(i, 368, Math.random()>0.4 ? 'brick' : 'lucky');
-            addPipe(1350); addEnemy(650,448); addEnemy(950,448); addEnemy(1400,448); addEnemy(1700,448); addEnemy(2000,448);
-            platforms.push({x:3200, y:140, w:60, h:348, type:'goal'});
-        } else if(n===2) {
-            platforms = [{x:0,y:488,w:1300,h:88,type:'ground'}, {x:1680,y:488,w:2800,h:88,type:'ground'}];
-            // Ugró lépcsők szakadékban
-            for(let py=420, px=1100; py>260; py-=40, px+=60) addBlock(px, py, 'brick');
-            addBlock(1480,300,'lucky'); addPipe(1950);
-            addEnemy(1820,448); addEnemy(2120,448); addEnemy(2420,448); addEnemy(2720,448); addEnemy(3020,448);
-            platforms.push({x:3800, y:140, w:60, h:348, type:'goal'});
-        } else { // BOSS REMAKE - ÚJ MODELL + AI
-            platforms = [{x:0,y:488,w:4000,h:88,type:'ground'}];
-            // Aréna lépcsők
-            addBlock(950,428,'brick'); addBlock(1010,368,'brick'); addBlock(1070,308,'brick'); addBlock(1130,248,'lucky');
-            // ÚJ BOSS: Bowser-remake, tűz légzés, ugrás, patrol + chase
-            enemies.push({
-                x: 1850, y: 368, w: 140, h: 140, vx: -6, vy: 0, hp: 15, maxHp: 15, type: 'boss',
-                patrolMin: 1450, patrolMax: 2850, aggroRange: 400, fireCooldown: 0, jumpCooldown: 0,
-                dir: -1, onGround: true, animFrame: 0
-            });
+    platforms.push({x:0, y:488, w:7000, h:88, type:'ground'});
+
+    if (n === 1) {
+        for(let i = 450; i < 1200; i += 55) {
+            addBlock(i, 368, Math.random() > 0.4 ? 'brick' : 'lucky');
         }
+        addPipe(1350);
+        addEnemy(650,448); addEnemy(950,448); addEnemy(1400,448);
+        addEnemy(1700,448); addEnemy(2000,448);
+        platforms.push({x:3200, y:140, w:60, h:348, type:'goal'});
     }
-    function addBlock(x,y,t) { platforms.push({x,y,w:52,h:52,type:t,used:false}); }
-    function addPipe(x) { platforms.push({x:x-15,y:488,w:82,h:70,type:'pipe_bottom'}); platforms.push({x:x-15,y:358,w:82,h:130,type:'pipe'}); }
-    function addEnemy(x,y) { enemies.push({x,y,w:46,h:46,vx: -4+Math.random()*1,patrolMin:x-220,patrolMax:x+220,type:'goomba'}); }
-
-    // UI
-    function updateHearts() { document.getElementById('hearts').innerHTML = Array(4).fill('💔').fill('❤️',0,hp).join(''); }
-
-    // Input
-    const keys = {};
-    window.addEventListener('keydown', e => { keys[e.code] = true; if(e.code==='Space') e.preventDefault(); });
-    window.addEventListener('keyup', e => keys[e.code] = false);
-    document.getElementById('startBtn').addEventListener('click', startGame);
-
-    function startGame() {
-        document.getElementById('menu').style.display = 'none';
-        buildLevel(1); active = true; score = hp = 3; updateHearts(); frame = 0;
-        requestAnimationFrame(loop);
-        playSfx(880,'sine',0.8,0.25); // Start sound
-    }
-
-    // Update loop (FULLY REFACTORED - ZERO BUGS)
-    function update() {
-        frame++; mario.animFrame = (mario.animFrame + 1) % 60;
-
-        // Mario mozgás (smooth accel)
-        const acc = 1.0, maxVx = mario.power ? 9.8 : 8.5;
-        if(keys['ArrowRight']) { mario.vx = Math.min(mario.vx + acc, maxVx); mario.dir = 1; }
-        else if(keys['ArrowLeft']) { mario.vx = Math.max(mario.vx - acc, -maxVx); mario.dir = -1; }
-        else mario.vx *= 0.82;
-        if(keys['Space'] && mario.onGround) { mario.vy = -20.5; mario.onGround = false; playSfx(659.25,'sine',0.22,0.15); }
-        if(keys['KeyF'] && mario.power && mario.fireballs.length < 8) {
-            mario.fireballs.push({x: mario.x + (mario.dir*38), y: mario.y+32, vx: mario.dir*16.5, vy: -3+Math.random()*5 });
-            playSfx(784,'sawtooth',0.12,0.18); keys['KeyF'] = false;
+    else if (n === 2) {
+        platforms = [
+            {x:0,   y:488, w:1300, h:88, type:'ground'},
+            {x:1680,y:488, w:2800, h:88, type:'ground'}
+        ];
+        for(let py=420, px=1100; py>260; py-=40, px+=60) {
+            addBlock(px, py, 'brick');
         }
-        mario.vy += 1.08; mario.x += mario.vx; mario.y += mario.vy;
+        addBlock(1480,300,'lucky');
+        addPipe(1950);
+        addEnemy(1820,448); addEnemy(2120,448); addEnemy(2420,448);
+        addEnemy(2720,448); addEnemy(3020,448);
+        platforms.push({x:3800, y:140, w:60, h:348, type:'goal'});
+    }
+    else {  // BOSS SZINT – NERFELT, NEM KÖVET, CSAK PATROL + RITKÁN LŐ/UGr
+        platforms = [{x:0,y:488,w:4000,h:88,type:'ground'}];
+        addBlock(950,428,'brick');
+        addBlock(1010,368,'brick');
+        addBlock(1070,308,'brick');
+        addBlock(1130,248,'lucky');
 
-        // KAMERA PERFECT LERP (no goofy)
-        const idealCam = mario.x - 480; targetCameraX = Math.max(0, Math.min(7200-960, idealCam));
-        cameraX += (targetCameraX - cameraX) * 0.18;
+        enemies.push({
+            x: 1850, y: 368, w: 140, h: 140,
+            vx: -4, vy: 0, hp: 10, maxHp: 10, type: 'boss',
+            patrolMin: 1450, patrolMax: 2850,
+            fireCooldown: 0, jumpCooldown: 0,
+            onGround: true, animFrame: 0
+        });
+    }
+}
 
-        // Parallax infinite
-        clouds.forEach(c => { c.x -= c.speed*0.75; if(c.x + c.size < cameraX-400) c.x += 3400; });
-        hills.forEach(h => { h.x -= h.speed*1.4; if(h.x + h.w < cameraX-500) h.x += 3800; });
+function addBlock(x, y, type) {
+    platforms.push({x, y, w:52, h:52, type, used: false});
+}
 
-        // COLLISION SYSTEM REMODELLED (AABB + sweep test, NO CLIP/BUG)
+function addPipe(x) {
+    platforms.push({x:x-15, y:488, w:82, h:70, type:'pipe_bottom'});
+    platforms.push({x:x-15, y:358, w:82, h:130, type:'pipe'});
+}
+
+function addEnemy(x, y) {
+    enemies.push({
+        x, y, w:46, h:46,
+        vx: -3.5 + Math.random()*1,
+        patrolMin: x-220, patrolMax: x+220,
+        type: 'goomba'
+    });
+}
+
+function updateHearts() {
+    let str = '';
+    for(let i = 0; i < 3; i++) str += (i < hp) ? '❤️' : '🖤';
+    document.getElementById('hearts').innerHTML = str;
+}
+
+const keys = {};
+window.addEventListener('keydown', e => {
+    keys[e.code] = true;
+    if (e.code === 'Space') e.preventDefault();
+});
+window.addEventListener('keyup', e => keys[e.code] = false);
+
+document.getElementById('startBtn').addEventListener('click', () => {
+    document.getElementById('menu').style.display = 'none';
+    buildLevel(1);
+    active = true;
+    score = 0;
+    hp = 3;
+    updateHearts();
+    requestAnimationFrame(loop);
+});
+
+function update() {
+    if (!active) return;
+    frame++;
+    mario.animFrame = (mario.animFrame + 1) % 60;
+
+    // Mario mozgás
+    const acc = 1.0;
+    const maxVx = mario.power ? 9.5 : 8.2;
+    if (keys['ArrowRight']) { mario.vx = Math.min(mario.vx + acc, maxVx); mario.dir = 1; }
+    else if (keys['ArrowLeft'])  { mario.vx = Math.max(mario.vx - acc, -maxVx); mario.dir = -1; }
+    else mario.vx *= 0.83;
+
+    if (keys['Space'] && mario.onGround) {
+        mario.vy = -19.8;
         mario.onGround = false;
-        platforms.forEach(p => {
-            const dx = (mario.x + mario.w/2) - (p.x + p.w/2), dy = (mario.y + mario.h/2) - (p.y + p.h/2);
-            const ow = p.w/2 + mario.w/2 - Math.abs(dx), oh = p.h/2 + mario.h/2 - Math.abs(dy);
-            if(ow > 0 && oh > 0) {
-                if(oh < ow && mario.vy >= 0 && mario.y < p.y) { mario.y = p.y - mario.h; mario.vy = 0; mario.onGround = true; }
-                else if(oh < ow && mario.vy <= 0 && mario.y > p.y) { mario.y = p.y + p.h; mario.vy = 0;
-                    if(p.type==='lucky' && !p.used) { p.used=true; items.push({x:p.x+16,y:p.y-55,type:'mushroom'}); playSfx(880,'sine',0.35,0.2); }
-                } else if(ow <= oh) {
-                    if(mario.vx > 0) { mario.x = p.x - mario.w; mario.vx = 0; }
-                    else if(mario.vx < 0) { mario.x = p.x + p.w; mario.vx = 0; }
-                }
-                if(p.type==='goal') nextLvl();
+        playSfx(659, 'sine', 0.18);
+    }
+
+    // Tűzgolyó cooldown (0.5 mp ≈ 30 frame 60fps-en)
+    if (mario.fireCooldown > 0) mario.fireCooldown--;
+    if (keys['KeyF'] && mario.power && mario.fireCooldown <= 0 && mario.fireballs.length < 6) {
+        mario.fireballs.push({
+            x: mario.x + (mario.dir > 0 ? 38 : -12),
+            y: mario.y + 32,
+            vx: mario.dir * 15.5,
+            vy: -2.5 + Math.random() * 4
+        });
+        playSfx(784, 'sawtooth', 0.1);
+        mario.fireCooldown = 30;   // ← 0.5 másodperc cooldown
+    }
+
+    mario.vy += 1.05;
+    mario.x += mario.vx;
+    mario.y += mario.vy;
+
+    // Kamera
+    targetCameraX = Math.max(0, Math.min(7200 - 960, mario.x - 480));
+    cameraX += (targetCameraX - cameraX) * 0.17;
+
+    // Parallax
+    clouds.forEach(c => {
+        c.x -= c.speed * 0.7;
+        if (c.x + c.size < cameraX - 400) c.x += 3400;
+    });
+    hills.forEach(h => {
+        h.x -= h.speed * 1.35;
+        if (h.x + h.w < cameraX - 500) h.x += 3800;
+    });
+
+    // Ütközés platformokkal (javított)
+    mario.onGround = false;
+    platforms.forEach(p => {
+        if (mario.x + mario.w > p.x && mario.x < p.x + p.w &&
+            mario.y + mario.h > p.y && mario.y < p.y + p.h) {
+            // földön landolás
+            if (mario.vy >= 0 && mario.y + mario.h - mario.vy <= p.y) {
+                mario.y = p.y - mario.h;
+                mario.vy = 0;
+                mario.onGround = true;
             }
-        });
-
-        // Items (float + collect)
-        items = items.filter(it => { it.y += 1.1; it.anim = (it.anim||0) + 0.2;
-            const hit = mario.x < it.x+40 && mario.x+mario.w > it.x && mario.y < it.y+40 && mario.y+mario.h > it.y;
-            if(hit) { mario.power = true; document.getElementById('powerLabel').innerText = '🔥 BOSS KILLER MODE! 🔥'; playSfx(1046.5,'sine',0.5,0.25); return false; }
-            return it.y < 520;
-        });
-
-        // Enemies UPDATE (boss special AI)
-        enemies.forEach((en,i) => {
-            en.x += en.vx; en.animFrame = (en.animFrame + 1) % 120;
-            if(en.type !== 'boss') { // Goomba patrol
-                if(en.x < en.patrolMin || en.x > en.patrolMax) en.vx *= -1;
-            } else { // BOSS REMAKE AI: patrol + chase + jump + fire
-                const distToMario = Math.abs(mario.x - en.x);
-                if(distToMario < en.aggroRange) { // Chase
-                    en.vx = mario.x > en.x ? 7.5 : -7.5;
-                    if(en.fireCooldown <= 0 && Math.random() < 0.02) { // Fire breath
-                        bossFireballs.push({x: en.x + (mario.x > en.x ? en.w : 0), y: en.y + 60, vx: (mario.x > en.x ? 12 : -12), vy: 4 + Math.random()*3 });
-                        en.fireCooldown = 180 + Math.random()*60; playSfx(220,'sawtooth',0.3,0.3);
-                    }
-                    if(en.jumpCooldown <= 0 && Math.random() < 0.015 && en.onGround) { // Jump attack
-                        en.vy = -18; en.jumpCooldown = 240 + Math.random()*120; playSfx(131,'sawtooth',0.4,0.25);
-                    }
-                } else { // Patrol
-                    if(en.x < en.patrolMin || en.x > en.patrolMax) en.vx *= -1;
+            // fejjel ütközés
+            else if (mario.vy < 0 && mario.y - mario.vy >= p.y + p.h) {
+                mario.y = p.y + p.h;
+                mario.vy = 0;
+                if (p.type === 'lucky' && !p.used) {
+                    p.used = true;
+                    items.push({x: p.x + 16, y: p.y - 55, type: 'mushroom'});
+                    playSfx(880, 'sine', 0.3);
                 }
-                en.fireCooldown = Math.max(0, en.fireCooldown - 1); en.jumpCooldown = Math.max(0, en.jumpCooldown - 1);
-                // Boss gravity/onGround
-                en.vy += 1.08; en.y += en.vy;
-                platforms.forEach(p => {
-                    if(en.x < p.x+p.w && en.x+en.w > p.x && en.y < p.y+p.h && en.y+en.h > p.y && en.vy >= 0 && en.y < p.y) {
-                        en.y = p.y - en.h; en.vy = 0; en.onGround = true;
-                    }
+            }
+            // oldalsó fal
+            else if (mario.vx > 0) {
+                mario.x = p.x - mario.w;
+                mario.vx = 0;
+            }
+            else if (mario.vx < 0) {
+                mario.x = p.x + p.w;
+                mario.vx = 0;
+            }
+            if (p.type === 'goal') nextLvl();
+        }
+    });
+
+    // Items
+    items = items.filter(it => {
+        it.y += 1.0;
+        if (mario.x + mario.w > it.x && mario.x < it.x + 40 &&
+            mario.y + mario.h > it.y && mario.y < it.y + 40) {
+            mario.power = true;
+            document.getElementById('powerLabel').innerText = 'TŰZ MARIO!';
+            playSfx(1047, 'sine', 0.4);
+            return false;
+        }
+        return it.y < 520;
+    });
+
+    // Ellenségek mozgása
+    enemies.forEach(en => {
+        if (en.type !== 'boss') {
+            en.x += en.vx;
+            if (en.x < en.patrolMin || en.x > en.patrolMax) en.vx *= -1;
+        } else {
+            // NERF: csak patrol, lassabb sebesség, ritkább tűz/ugrás
+            en.x += en.vx;
+            if (en.x < en.patrolMin || en.x > en.patrolMax) en.vx *= -1;
+
+            if (en.fireCooldown <= 0 && Math.random() < 0.008) { // ritkább tűz
+                bossFireballs.push({
+                    x: en.x + (en.vx > 0 ? en.w : 0),
+                    y: en.y + 60,
+                    vx: en.vx > 0 ? 9 : -9,
+                    vy: 3 + Math.random()*3
                 });
-                if(en.y > 650) { en.y = 368; en.vy = 0; } // Boss fall reset
+                en.fireCooldown = 240; // kb. 4 másodperc
+                playSfx(180, 'sawtooth', 0.35);
             }
-        });
 
-        // Mario vs Enemies COLL (precise, no bug)
-        for(let i=enemies.length-1; i>=0; i--) {
-            const en = enemies[i];
-            const hit = mario.x < en.x+en.w && mario.x+mario.w > en.x && mario.y < en.y+en.h && mario.y+mario.h > en.y;
-            if(hit) {
-                if(mario.vy > 1 && mario.y < en.y + 20) { // Stomp
-                    if(en.type==='boss') {
-                        en.hp -= 2; mario.vy = -19; playSfx(165.8,'sawtooth',0.3,0.22);
-                        if(en.hp <= 0) { score += 15000; win(); return; }
-                    } else {
-                        enemies.splice(i,1); mario.vy = -16; score += 400; playSfx(220,'sine',0.25,0.18);
+            if (en.jumpCooldown <= 0 && Math.random() < 0.007 && en.onGround) {
+                en.vy = -14; // kisebb ugrás
+                en.jumpCooldown = 300; // ritkább
+                playSfx(110, 'sawtooth', 0.4);
+            }
+
+            en.fireCooldown = Math.max(0, en.fireCooldown - 1);
+            en.jumpCooldown = Math.max(0, en.jumpCooldown - 1);
+
+            en.vy += 1.05;
+            en.y += en.vy;
+
+            // boss földön landolás
+            let bossGround = false;
+            platforms.forEach(p => {
+                if (en.x + en.w > p.x && en.x < p.x + p.w &&
+                    en.y + en.h > p.y && en.y < p.y + p.h &&
+                    en.vy >= 0 && en.y + en.h - en.vy <= p.y) {
+                    en.y = p.y - en.h;
+                    en.vy = 0;
+                    bossGround = true;
+                }
+            });
+            if (en.y > 650) { en.y = 368; en.vy = 0; }
+        }
+    });
+
+    // Mario ↔ ellenség ütközés
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const en = enemies[i];
+        if (mario.x + mario.w > en.x && mario.x < en.x + en.w &&
+            mario.y + mario.h > en.y && mario.y < en.y + en.h) {
+            if (mario.vy > 0.5 && mario.y < en.y + 25) {
+                // stomp
+                if (en.type === 'boss') {
+                    en.hp -= 2;
+                    mario.vy = -17;
+                    playSfx(150, 'sawtooth', 0.25);
+                    if (en.hp <= 0) {
+                        score += 12000;
+                        win();
+                        return;
                     }
-                } else die();
+                } else {
+                    enemies.splice(i, 1);
+                    mario.vy = -15;
+                    score += 300;
+                    playSfx(200, 'sine', 0.2);
+                }
+            } else {
+                die();
             }
         }
-
-        // Mario fireballs
-        mario.fireballs = mario.fireballs.filter(fb => {
-            fb.x += fb.vx; fb.y += fb.vy; fb.vy += 0.75;
-            if(fb.y > 470) fb.vy *= -0.75;
-            for(let ei=0; ei<enemies.length; ei++) {
-                const en = enemies[ei];
-                if(fb.x < en.x+en.w && fb.x+20 > en.x && fb.y < en.y+en.h && fb.y+20 > en.y) {
-                    if(en.type==='boss') { en.hp -= 2.5; playSfx(349.2,'sawtooth',0.18,0.2); }
-                    else { enemies.splice(ei,1); score += 250; }
-                    return false;
-                }
-            }
-            return fb.x > cameraX-250 && fb.x < cameraX+1210;
-        });
-
-        // Boss fireballs (új!)
-        bossFireballs = bossFireballs.filter(bfb => {
-            bfb.x += bfb.vx; bfb.y += bfb.vy; bfb.vy += 0.85;
-            if(bfb.y > 500) return false;
-            // Hit Mario
-            if(bfb.x < mario.x+mario.w && bfb.x+24 > mario.x && bfb.y < mario.y+mario.h && bfb.y+24 > mario.y) { die(); return false; }
-            return bfb.x > cameraX-200 && bfb.x < cameraX+1160;
-        });
-
-        if(mario.y > 680) die();
-        document.getElementById('scDisplay').innerText = score;
     }
 
-    function die() {
-        playSfx(82.4,'square',0.7,0.3); hp--; updateHearts();
-        if(hp <= 0) { active = false; setTimeout(()=>document.getElementById('fail').style.display='flex',600); }
-        else {
-            mario.x = 160; mario.y = 380; mario.vx = mario.vy = 0; mario.power = false;
-            document.getElementById('powerLabel').innerText = ''; mario.fireballs = []; cameraX = targetCameraX = 0;
+    // Mario tűzgolyói
+    mario.fireballs = mario.fireballs.filter(fb => {
+        fb.x += fb.vx;
+        fb.y += fb.vy;
+        fb.vy += 0.72;
+        if (fb.y > 470) fb.vy *= -0.7;
+
+        for (let i = 0; i < enemies.length; i++) {
+            const en = enemies[i];
+            if (fb.x + 20 > en.x && fb.x < en.x + en.w &&
+                fb.y + 20 > en.y && fb.y < en.y + en.h) {
+                if (en.type === 'boss') {
+                    en.hp -= 2;
+                    playSfx(320, 'sawtooth', 0.15);
+                } else {
+                    enemies.splice(i, 1);
+                    score += 200;
+                }
+                return false;
+            }
         }
+        return fb.x > cameraX - 200 && fb.x < cameraX + 1200;
+    });
+
+    // Boss tűzgolyói
+    bossFireballs = bossFireballs.filter(fb => {
+        fb.x += fb.vx;
+        fb.y += fb.vy;
+        fb.vy += 0.8;
+        if (fb.y > 500) return false;
+
+        if (fb.x + 24 > mario.x && fb.x < mario.x + mario.w &&
+            fb.y + 24 > mario.y && fb.y < mario.y + mario.h) {
+            die();
+            return false;
+        }
+        return fb.x > cameraX - 200 && fb.x < cameraX + 1200;
+    });
+
+    if (mario.y > 680) die();
+
+    document.getElementById('scDisplay').innerText = score;
+}
+
+function die() {
+    playSfx(82, 'square', 0.7, 0.28);
+    hp--;
+    updateHearts();
+    if (hp <= 0) {
+        active = false;
+        setTimeout(() => document.getElementById('fail').style.display = 'flex', 400);
+    } else {
+        mario.x = 160;
+        mario.y = 380;
+        mario.vx = mario.vy = 0;
+        mario.power = false;
+        mario.fireballs = [];
+        mario.fireCooldown = 0;
+        document.getElementById('powerLabel').innerText = '';
+        cameraX = targetCameraX = 0;
     }
-    function nextLvl() { currentLvl++; if(currentLvl>3) win(); else { playSfx(1318.5,'sine',0.7,0.25); buildLevel(currentLvl); } }
-    function win() { active = false; score += 30000; setTimeout(()=>document.getElementById('victory').style.display='flex',1000); playSfx(987.8,'sine',1.5,0.35); }
+}
 
-    // Render (REMODELLED sprites + effects)
-    function render() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
+function nextLvl() {
+    currentLvl++;
+    if (currentLvl > 3) win();
+    else {
+        playSfx(1319, 'sine', 0.6);
+        buildLevel(currentLvl);
+    }
+}
 
-        // Parallax layers
-        ctx.save(); ctx.translate(-cameraX*0.18,0);
-        clouds.forEach(c => {
-            const puff = 0.65 + Math.sin(frame*0.035 + c.x*0.008)*0.2;
-            ctx.fillStyle = `rgba(255,255,255,${puff})`;
-            ctx.beginPath(); ctx.arc(c.x,c.y,c.size/2,0,Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(c.x-c.size/3.5,c.y-10,c.size/3.8,0,Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(c.x+c.size/3.2,c.y-6,c.size/2.6,0,Math.PI*2); ctx.fill();
-        }); ctx.restore();
+function win() {
+    active = false;
+    score += 25000;
+    setTimeout(() => document.getElementById('victory').style.display = 'flex', 800);
+    playSfx(988, 'sine', 1.2);
+}
 
-        ctx.save(); ctx.translate(-cameraX*0.52,0);
-        hills.forEach(h => {
-            ctx.fillStyle = '#32cd32'; ctx.strokeStyle = '#228b22'; ctx.lineWidth = 4; ctx.lineJoin = 'round';
-            ctx.beginPath(); ctx.moveTo(h.x,488); ctx.quadraticCurveTo(h.x+h.w/2,488-h.h,h.x+h.w,488); ctx.fill(); ctx.stroke();
-        }); ctx.restore();
+// RENDER
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.save(); ctx.translate(-cameraX,0);
+    // 1. Távoli parallax (felhők)
+    ctx.save();
+    ctx.translate(-cameraX * 0.18, 0);
+    clouds.forEach(c => {
+        ctx.fillStyle = `rgba(255,255,255,${0.65 + Math.sin(frame*0.03 + c.x*0.01)*0.18})`;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.size/2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(c.x - c.size/3.5, c.y - 10, c.size/3.8, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(c.x + c.size/3.2, c.y - 6, c.size/2.6, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.restore();
 
-        // Platforms (detailed textures)
-        platforms.forEach(p => {
-            const px=p.x, py=p.y;
-            if(p.type==='ground') {
-                ctx.fillStyle='#8b4513'; ctx.fillRect(px,py,p.w,p.h);
-                ctx.fillStyle='#228b22'; ctx.fillRect(px,py,p.w,24);
-                ctx.fillStyle='#006400'; for(let i=0;i<p.w;i+=12) ctx.fillRect(px+i,py-6+Math.sin(frame*0.15+i*0.12)*3,6,15);
-            } else if(p.type==='brick') {
-                ctx.fillStyle='#cd853f'; ctx.fillRect(px,py,p.w,p.h);
-                ctx.strokeStyle='#8b4513'; ctx.lineWidth=3; ctx.strokeRect(px+6,py+6,p.w-12,p.h-12);
-                ctx.strokeRect(px+28,py+28,p.w-56,p.h-56);
-            } else if(p.type==='lucky') {
-                const pulse = 220 + Math.sin(frame*0.25)*70; ctx.shadowColor=`hsl(${pulse/2.2},100%,55%)`; ctx.shadowBlur=25;
-                ctx.fillStyle=`hsl(${pulse/2.5},100%,48%)`; ctx.fillRect(px,py,p.w,p.h); ctx.shadowBlur=0;
-                ctx.fillStyle='white'; ctx.font='bold 32px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('?',px+26,py+26);
-            } else if(p.type==='pipe') {
-                ctx.fillStyle='#006400'; ctx.fillRect(px,py,p.w,p.h);
-                ctx.fillStyle='#228b22'; ctx.fillRect(px+12,py+8,p.w-24,p.h-16);
-            } else if(p.type==='pipe_bottom') {
-                ctx.fillStyle='#004d00'; ctx.fillRect(px,py,p.w,p.h);
-                ctx.fillStyle='#228b22'; ctx.fillRect(px+16,py-12,p.w-32,20);
-            } else if(p.type==='goal') {
-                ctx.fillStyle='#a52a2a'; ctx.fillRect(px-25,py,25,p.h);
-                const wave = Math.sin(frame*0.25)*25; ctx.fillStyle='white';
-                ctx.beginPath(); ctx.moveTo(px,py+50); ctx.quadraticCurveTo(px-65,py+50+wave,px-55,py+80+wave*0.7); ctx.lineTo(px,py+95); ctx.fill();
-                ctx.fillStyle='black'; ctx.fillRect(px-20,py+55,75,28);
+    // 2. Közeli dombok
+    ctx.save();
+    ctx.translate(-cameraX * 0.52, 0);
+    hills.forEach(h => {
+        ctx.fillStyle = '#32cd32';
+        ctx.strokeStyle = '#228b22';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(h.x, 488);
+        ctx.quadraticCurveTo(h.x + h.w/2, 488 - h.h, h.x + h.w, 488);
+        ctx.fill();
+        ctx.stroke();
+    });
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(-cameraX, 0);
+
+    // Platformok
+    platforms.forEach(p => {
+        const px = p.x, py = p.y;
+        if (p.type === 'ground') {
+            ctx.fillStyle = '#8b4513'; ctx.fillRect(px, py, p.w, p.h);
+            ctx.fillStyle = '#228b22'; ctx.fillRect(px, py, p.w, 24);
+            ctx.fillStyle = '#006400';
+            for (let i = 0; i < p.w; i += 12) {
+                ctx.fillRect(px + i, py - 6 + Math.sin(frame * 0.15 + i * 0.1) * 3, 6, 15);
             }
-        });
+        } else if (p.type === 'brick') {
+            ctx.fillStyle = '#cd853f'; ctx.fillRect(px, py, p.w, p.h);
+            ctx.strokeStyle = '#8b4513'; ctx.lineWidth = 3;
+            ctx.strokeRect(px + 6, py + 6, p.w - 12, p.h - 12);
+        } else if (p.type === 'lucky') {
+            const g = 220 + Math.sin(frame * 0.25) * 70;
+            ctx.shadowColor = `hsl(${g/2},100%,55%)`;
+            ctx.shadowBlur = 25;
+            ctx.fillStyle = `hsl(${g/2.5},100%,48%)`;
+            ctx.fillRect(px, py, p.w, p.h);
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('?', px + 26, py + 26);
+        } else if (p.type === 'pipe' || p.type === 'pipe_bottom') {
+            ctx.fillStyle = p.type === 'pipe' ? '#006400' : '#004d00';
+            ctx.fillRect(px, py, p.w, p.h);
+            ctx.fillStyle = '#228b22';
+            ctx.fillRect(px + 12, py + (p.type==='pipe'?8:-12), p.w - 24, p.h - (p.type==='pipe'?16:0) + 20);
+        } else if (p.type === 'goal') {
+            ctx.fillStyle = '#a52a2a'; ctx.fillRect(px - 25, py, 25, p.h);
+            const wv = Math.sin(frame * 0.25) * 25;
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.moveTo(px, py + 50);
+            ctx.quadraticCurveTo(px - 65, py + 50 + wv, px - 55, py + 80 + wv * 0.7);
+            ctx.lineTo(px, py + 95);
+            ctx.fill();
+        }
+    });
 
-        // Items (shiny mushroom)
-        items.forEach(it => {
-            ctx.save(); ctx.shadowColor='#ff6666'; ctx.shadowBlur=20;
-            ctx.fillStyle='white'; ctx.beginPath(); ctx.ellipse(it.x+20,it.y+20,20,15,0,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='#ff4444'; ctx.beginPath(); ctx.ellipse(it.x+20,it.y+20,14,11,0,0,Math.PI*2); ctx.fill();
-            ctx.shadowBlur=0; ctx.fillStyle='white'; ctx.fillRect(it.x+16,it.y+31,12,20);
-            ctx.restore();
-        });
+    // Items (gomba)
+    items.forEach(it => {
+        ctx.save();
+        ctx.shadowColor = '#ff6666';
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.ellipse(it.x + 20, it.y + 20, 20, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ff4444';
+        ctx.beginPath();
+        ctx.ellipse(it.x + 20, it.y + 20, 14, 11, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(it.x + 16, it.y + 31, 12, 20);
+        ctx.restore();
+    });
 
-        // Enemies (detailed sprites)
-        enemies.forEach(en => {
-            if(en.type==='goomba') {
-                const ex=en.x, ey=en.y + Math.sin(frame*0.42 + en.animFrame)*4;
-                ctx.fillStyle='#5d4037'; ctx.fillRect(ex+6,ey+12,34,32);
-                ctx.fillStyle='#8b7355'; ctx.fillRect(ex+8,ey+14,30,28);
-                ctx.fillStyle='white'; ctx.fillRect(ex+12,ey+18,10,10); ctx.fillRect(ex+24,ey+18,10,10);
-                ctx.fillStyle='black'; ctx.fillRect(ex+15,ey+21,5,5); ctx.fillRect(ex+27,ey+21,5,5);
-                ctx.fillStyle='#4a362a'; ctx.fillRect(ex+10,ey+42 + Math.sin(frame*0.5)*3,10,16); ctx.fillRect(ex+26,ey+42 - Math.sin(frame*0.5)*3,10,16);
-            } else { // BOSS REMAKE MODEL: Bowser-like, fire mouth, spikes, shake on low HP
-                const bx=en.x, by=en.y + (en.hp < 8 ? Math.sin(frame*0.6)*8 : 0);
-                const hpFrac = en.hp / en.maxHp;
-                ctx.save(); ctx.shadowColor= hpFrac>0.5 ? '#ff4500' : '#ff0000'; ctx.shadowBlur= hpFrac<0.3 ? 35 : 15;
-                // Body
-                ctx.fillStyle='#4b0082'; ctx.fillRect(bx+15,by+30,110,110);
-                ctx.fillStyle='#7b2cbf'; ctx.fillRect(bx+25,by+40,90,90);
-                // Shell spikes
-                ctx.fillStyle='#d2691e'; for(let s=0;s<5;s++) {
-                    ctx.beginPath(); ctx.moveTo(bx+35+s*20,by+30); ctx.lineTo(bx+45+s*20,by+10); ctx.lineTo(bx+55+s*20,by+30); ctx.fill();
-                }
-                // Head
-                ctx.fillStyle='#654321'; ctx.fillRect(bx+80,by+15,50,45);
-                ctx.fillStyle='#8b7355'; ctx.fillRect(bx+85,by+20,40,35);
-                // Eyes (angry)
-                ctx.fillStyle= hpFrac>0.5 ? 'yellow' : 'red'; ctx.fillRect(bx+95,by+25,20,18); ctx.fillRect(bx+115,by+25,20,18);
-                ctx.fillStyle='black'; ctx.fillRect(bx+100,by+30,10,10); ctx.fillRect(bx+120,by+30,10,10);
-                // Fire mouth (blink)
-                if(Math.floor(frame/10)%4 < 2) { ctx.shadowBlur += 20; ctx.fillStyle='#ff4500'; ctx.fillRect(bx+105,by+50,25,15); }
-                ctx.shadowBlur=0;
-                // HP BAR UPGRADED
-                ctx.fillStyle='#111'; ctx.fillRect(bx+15,by-25,110,18); ctx.fillStyle='#333'; ctx.fillRect(bx+18,by-22,104,12);
-                const barW = 104 * hpFrac; ctx.fillStyle= hpFrac>0.6 ? '#00ff88' : hpFrac>0.3 ? '#ffaa00' : '#ff2222';
-                ctx.fillRect(bx+18,by-22,barW,12); ctx.fillStyle='white';
-                ctx.font='bold 20px Arial'; ctx.textAlign='center'; ctx.fillText(`${en.hp}/${en.maxHp}`, bx+70, by-10);
-                ctx.restore();
+    // Ellenségek – GOOMBA részletesebb
+    enemies.forEach(en => {
+        const ex = en.x, ey = en.y;
+        if (en.type === 'goomba') {
+            const bobY = Math.sin(frame * 0.4 + ex * 0.01) * 4;
+            ctx.fillStyle = '#5d4037';
+            ctx.fillRect(ex + 6, ey + 10 + bobY, 34, 34);
+            ctx.fillStyle = '#8b7355';
+            ctx.fillRect(ex + 8, ey + 12 + bobY, 30, 30);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(ex + 12, ey + 16 + bobY, 10, 10);
+            ctx.fillRect(ex + 24, ey + 16 + bobY, 10, 10);
+            ctx.fillStyle = 'black';
+            ctx.fillRect(ex + 15, ey + 19 + bobY, 5, 5);
+            ctx.fillRect(ex + 27, ey + 19 + bobY, 5, 5);
+            ctx.fillStyle = '#4a362a';
+            ctx.fillRect(ex + 10, ey + 40 + bobY + Math.sin(frame*0.6)*3, 10, 16);
+            ctx.fillRect(ex + 26, ey + 40 + bobY - Math.sin(frame*0.6)*3, 10, 16);
+        } else {
+            // BOSS – egyszerűsített, nerf kinézet
+            const bx = en.x, by = en.y;
+            ctx.fillStyle = '#4b0082';
+            ctx.fillRect(bx + 20, by + 40, 100, 100);
+            ctx.fillStyle = '#7b2cbf';
+            ctx.fillRect(bx + 30, by + 50, 80, 80);
+            ctx.fillStyle = '#d2691e';
+            for (let s = 0; s < 4; s++) {
+                ctx.beginPath();
+                ctx.moveTo(bx + 40 + s*20, by + 40);
+                ctx.lineTo(bx + 50 + s*20, by + 20);
+                ctx.lineTo(bx + 60 + s*20, by + 40);
+                ctx.fill();
             }
-        });
+            // fej
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(bx + 80, by + 25, 40, 40);
+            ctx.fillStyle = '#ff4444';
+            ctx.fillRect(bx + 90, by + 35, 20, 15); // száj
+            // HP bar
+            ctx.fillStyle = '#222';
+            ctx.fillRect(bx + 20, by + 10, 100, 14);
+            const hpW = 100 * (en.hp / en.maxHp);
+            ctx.fillStyle = en.hp > 6 ? '#00cc44' : en.hp > 3 ? '#ffaa00' : '#ff4444';
+            ctx.fillRect(bx + 20, by + 10, hpW, 14);
+        }
+    });
 
-        // Boss fireballs (orange deadly)
-        bossFireballs.forEach(bfb => {
-            ctx.save(); ctx.shadowColor='#ff2200'; ctx.shadowBlur=30;
-            ctx.fillStyle='rgba(255,69,0,0.7)'; ctx.beginPath(); ctx.arc(bfb.x+12,bfb.y+12,16,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='#ff4500'; ctx.beginPath(); ctx.arc(bfb.x+12,bfb.y+12,10,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; ctx.restore();
-        });
+    // Boss tűzgolyók
+    bossFireballs.forEach(fb => {
+        ctx.save();
+        ctx.shadowColor = '#ff2200';
+        ctx.shadowBlur = 25;
+        ctx.fillStyle = 'rgba(255,100,0,0.7)';
+        ctx.beginPath();
+        ctx.arc(fb.x + 12, fb.y + 12, 16, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#ff4500';
+        ctx.beginPath();
+        ctx.arc(fb.x + 12, fb.y + 12, 10, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+    });
 
-        // Mario fireballs (trail effect)
-        mario.fireballs.forEach(fb => {
-            ctx.save(); ctx.shadowColor='#ff8800'; ctx.shadowBlur=28;
-            ctx.fillStyle='rgba(255,165,0,0.5)'; ctx.beginPath(); ctx.arc(fb.x+10-fb.vx*0.5,fb.y+10-fb.vy*0.5,18,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='orange'; ctx.beginPath(); ctx.arc(fb.x+10,fb.y+10,12,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; ctx.restore();
-        });
+    // Mario tűzgolyók
+    mario.fireballs.forEach(fb => {
+        ctx.save();
+        ctx.shadowColor = '#ff8800';
+        ctx.shadowBlur = 25;
+        ctx.fillStyle = 'rgba(255,180,0,0.6)';
+        ctx.beginPath();
+        ctx.arc(fb.x + 10, fb.y + 10, 14, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = 'orange';
+        ctx.beginPath();
+        ctx.arc(fb.x + 10, fb.y + 10, 9, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+    });
 
-        // MARIO REMODELLED SPRITE (full animation)
-        const mx = mario.x, my = mario.y;
-        const bob = (mario.onGround && Math.abs(mario.vx)>2) ? Math.sin(frame*0.55)*6 : 0;
-        const squash = Math.max(0, mario.vy * 0.12);
-        // Hat
-        ctx.fillStyle = mario.power ? '#ff8c00' : '#e31b23'; ctx.fillRect(mx+6,my+4+bob*0.7-squash,28,16);
-        ctx.fillStyle='white'; ctx.font='bold 16px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText('M', mx+20, my+12+bob*0.7-squash);
-        // Head
-        ctx.fillStyle='#ffdbac'; ctx.fillRect(mx+8,my+20-squash,24,22+squash);
-        // Eyes (directional blink)
-        ctx.fillStyle='black'; ctx.fillRect(mario.dir>0 ? mx+21 : mx+11, my+26+bob*0.4,6,7);
-        // Mustache
-        ctx.fillRect(mx+13,my+36+bob*0.5,14,6);
-        // Overalls
-        ctx.fillStyle = mario.power ? '#ffd700' : '#c41e3a'; ctx.fillRect(mx+4,my+38+bob,32,22);
-        // Buttons
-        ctx.fillStyle='#ffff00'; ctx.fillRect(mx+11,my+42+bob,8,8); ctx.fillRect(mx+21,my+42+bob,8,8);
-        // Gloves
-        ctx.fillStyle='white'; ctx.fillRect(mx+(mario.dir>0 ? 2 : 29),my+40+bob,10,16);
-        // Shoes (step anim)
-        ctx.fillStyle='#8b4513'; const footBob = mario.dir>0 ? bob : -bob;
-        ctx.fillRect(mx+7+footBob,my+56+Math.abs(bob)*0.3,13,12); ctx.fillRect(mx+20-footBob,my+56-Math.abs(bob)*0.3,13,12);
+    // Mario rajzolás
+    const mx = mario.x, my = mario.y;
+    const bob = (mario.onGround && Math.abs(mario.vx) > 1.5) ? Math.sin(frame * 0.55) * 5 : 0;
+    const squash = Math.max(0, mario.vy * 0.1);
 
-        ctx.restore(); ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-    }
+    ctx.fillStyle = mario.power ? '#ff8c00' : '#e31b23';
+    ctx.fillRect(mx + 6, my + 4 + bob - squash, 28, 16);
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('M', mx + 20, my + 12 + bob - squash);
 
-    function loop() {
-        if(active) update();
-        render();
-        requestAnimationFrame(loop);
-    }
-})();
+    ctx.fillStyle = '#ffdbac';
+    ctx.fillRect(mx + 8, my + 20 - squash, 24, 22 + squash);
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(mario.dir > 0 ? mx + 21 : mx + 11, my + 26 + bob*0.4, 6, 7);
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(mx + 13, my + 36 + bob*0.5, 14, 6);
+
+    ctx.fillStyle = mario.power ? '#ffd700' : '#c41e3a';
+    ctx.fillRect(mx + 4, my + 38 + bob, 32, 22);
+
+    ctx.fillStyle = '#ffff00';
+    ctx.fillRect(mx + 11, my + 42 + bob, 8, 8);
+    ctx.fillRect(mx + 21, my + 42 + bob, 8, 8);
+
+    ctx.fillStyle = 'white';
+    ctx.fillRect(mx + (mario.dir > 0 ? 2 : 29), my + 40 + bob, 10, 16);
+
+    ctx.fillStyle = '#8b4513';
+    const foot = mario.dir > 0 ? bob : -bob;
+    ctx.fillRect(mx + 7 + foot, my + 56 + Math.abs(bob)*0.2, 13, 12);
+    ctx.fillRect(mx + 20 - foot, my + 56 - Math.abs(bob)*0.2, 13, 12);
+
+    ctx.restore();
+}
+
+function loop() {
+    if (active) update();
+    render();
+    requestAnimationFrame(loop);
+}
 </script>
 </body>
 </html>
