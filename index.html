@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🕹️ KRIS SUPER MARIO - NERFED BOSS (NO CHASE) 🏆</title>
+    <title>🕹️ KRIS SUPER MARIO - FIX BOSS DEATH 🏆</title>
     <style>
         * { box-sizing: border-box; margin:0; padding:0; }
         body { 
@@ -78,8 +78,6 @@
 </div>
 
 <script>
-// ==================== JAVASCRIPT RÉSZ ====================
-
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 canvas.width = 960;
@@ -98,7 +96,7 @@ const mario = {
     x: 120, y: 380, w: 40, h: 56,
     vx: 0, vy: 0, onGround: false, dir: 1,
     power: false, fireballs: [],
-    fireCooldown: 0,   // ← új: tűzgolyó cooldown
+    fireCooldown: 0,
     animFrame: 0
 };
 
@@ -111,8 +109,7 @@ let bossFireballs = [];
 
 let audioCtx;
 function initAudio() {
-    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-    catch(e) {}
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
 }
 function playSfx(freq, type='square', duration=0.12, volume=0.12) {
     if (!audioCtx) return;
@@ -141,7 +138,6 @@ function buildLevel(n) {
     document.getElementById('lvlDisplay').innerText = n;
     updateHearts();
 
-    // parallax háttér
     for(let i = 0; i < 35; i++) {
         clouds.push({x: i*420 + Math.random()*450, y: 70 + Math.random()*130,
                      size: 45 + Math.random()*55, speed: 0.2 + Math.random()*0.4});
@@ -176,7 +172,7 @@ function buildLevel(n) {
         addEnemy(2720,448); addEnemy(3020,448);
         platforms.push({x:3800, y:140, w:60, h:348, type:'goal'});
     }
-    else {  // BOSS SZINT – NERFELT, NEM KÖVET, CSAK PATROL + RITKÁN LŐ/UGr
+    else {
         platforms = [{x:0,y:488,w:4000,h:88,type:'ground'}];
         addBlock(950,428,'brick');
         addBlock(1010,368,'brick');
@@ -193,15 +189,11 @@ function buildLevel(n) {
     }
 }
 
-function addBlock(x, y, type) {
-    platforms.push({x, y, w:52, h:52, type, used: false});
-}
-
+function addBlock(x, y, type) { platforms.push({x, y, w:52, h:52, type, used: false}); }
 function addPipe(x) {
     platforms.push({x:x-15, y:488, w:82, h:70, type:'pipe_bottom'});
     platforms.push({x:x-15, y:358, w:82, h:130, type:'pipe'});
 }
-
 function addEnemy(x, y) {
     enemies.push({
         x, y, w:46, h:46,
@@ -252,7 +244,6 @@ function update() {
         playSfx(659, 'sine', 0.18);
     }
 
-    // Tűzgolyó cooldown (0.5 mp ≈ 30 frame 60fps-en)
     if (mario.fireCooldown > 0) mario.fireCooldown--;
     if (keys['KeyF'] && mario.power && mario.fireCooldown <= 0 && mario.fireballs.length < 6) {
         mario.fireballs.push({
@@ -262,18 +253,16 @@ function update() {
             vy: -2.5 + Math.random() * 4
         });
         playSfx(784, 'sawtooth', 0.1);
-        mario.fireCooldown = 30;   // ← 0.5 másodperc cooldown
+        mario.fireCooldown = 30;
     }
 
     mario.vy += 1.05;
     mario.x += mario.vx;
     mario.y += mario.vy;
 
-    // Kamera
     targetCameraX = Math.max(0, Math.min(7200 - 960, mario.x - 480));
     cameraX += (targetCameraX - cameraX) * 0.17;
 
-    // Parallax
     clouds.forEach(c => {
         c.x -= c.speed * 0.7;
         if (c.x + c.size < cameraX - 400) c.x += 3400;
@@ -283,18 +272,15 @@ function update() {
         if (h.x + h.w < cameraX - 500) h.x += 3800;
     });
 
-    // Ütközés platformokkal (javított)
     mario.onGround = false;
     platforms.forEach(p => {
         if (mario.x + mario.w > p.x && mario.x < p.x + p.w &&
             mario.y + mario.h > p.y && mario.y < p.y + p.h) {
-            // földön landolás
             if (mario.vy >= 0 && mario.y + mario.h - mario.vy <= p.y) {
                 mario.y = p.y - mario.h;
                 mario.vy = 0;
                 mario.onGround = true;
             }
-            // fejjel ütközés
             else if (mario.vy < 0 && mario.y - mario.vy >= p.y + p.h) {
                 mario.y = p.y + p.h;
                 mario.vy = 0;
@@ -304,7 +290,6 @@ function update() {
                     playSfx(880, 'sine', 0.3);
                 }
             }
-            // oldalsó fal
             else if (mario.vx > 0) {
                 mario.x = p.x - mario.w;
                 mario.vx = 0;
@@ -317,7 +302,6 @@ function update() {
         }
     });
 
-    // Items
     items = items.filter(it => {
         it.y += 1.0;
         if (mario.x + mario.w > it.x && mario.x < it.x + 40 &&
@@ -330,30 +314,28 @@ function update() {
         return it.y < 520;
     });
 
-    // Ellenségek mozgása
     enemies.forEach(en => {
         if (en.type !== 'boss') {
             en.x += en.vx;
             if (en.x < en.patrolMin || en.x > en.patrolMax) en.vx *= -1;
         } else {
-            // NERF: csak patrol, lassabb sebesség, ritkább tűz/ugrás
             en.x += en.vx;
             if (en.x < en.patrolMin || en.x > en.patrolMax) en.vx *= -1;
 
-            if (en.fireCooldown <= 0 && Math.random() < 0.008) { // ritkább tűz
+            if (en.fireCooldown <= 0 && Math.random() < 0.008) {
                 bossFireballs.push({
                     x: en.x + (en.vx > 0 ? en.w : 0),
                     y: en.y + 60,
                     vx: en.vx > 0 ? 9 : -9,
                     vy: 3 + Math.random()*3
                 });
-                en.fireCooldown = 240; // kb. 4 másodperc
+                en.fireCooldown = 240;
                 playSfx(180, 'sawtooth', 0.35);
             }
 
             if (en.jumpCooldown <= 0 && Math.random() < 0.007 && en.onGround) {
-                en.vy = -14; // kisebb ugrás
-                en.jumpCooldown = 300; // ritkább
+                en.vy = -14;
+                en.jumpCooldown = 300;
                 playSfx(110, 'sawtooth', 0.4);
             }
 
@@ -363,36 +345,34 @@ function update() {
             en.vy += 1.05;
             en.y += en.vy;
 
-            // boss földön landolás
-            let bossGround = false;
             platforms.forEach(p => {
                 if (en.x + en.w > p.x && en.x < p.x + p.w &&
                     en.y + en.h > p.y && en.y < p.y + p.h &&
                     en.vy >= 0 && en.y + en.h - en.vy <= p.y) {
                     en.y = p.y - en.h;
                     en.vy = 0;
-                    bossGround = true;
                 }
             });
+
             if (en.y > 650) { en.y = 368; en.vy = 0; }
         }
     });
 
-    // Mario ↔ ellenség ütközés
+    // Fontos javítás: boss halál ellenőrzés minden sebzés után
     for (let i = enemies.length - 1; i >= 0; i--) {
         const en = enemies[i];
         if (mario.x + mario.w > en.x && mario.x < en.x + en.w &&
             mario.y + mario.h > en.y && mario.y < en.y + en.h) {
             if (mario.vy > 0.5 && mario.y < en.y + 25) {
-                // stomp
                 if (en.type === 'boss') {
-                    en.hp -= 2;
+                    en.hp = Math.max(0, en.hp - 2);   // ← nem mehet negatívba
                     mario.vy = -17;
                     playSfx(150, 'sawtooth', 0.25);
                     if (en.hp <= 0) {
                         score += 12000;
+                        enemies.splice(i, 1);
                         win();
-                        return;
+                        return;  // azonnal kilépünk az update-ből
                     }
                 } else {
                     enemies.splice(i, 1);
@@ -402,41 +382,48 @@ function update() {
                 }
             } else {
                 die();
+                return;
             }
         }
     }
 
-    // Mario tűzgolyói
     mario.fireballs = mario.fireballs.filter(fb => {
         fb.x += fb.vx;
         fb.y += fb.vy;
         fb.vy += 0.72;
         if (fb.y > 470) fb.vy *= -0.7;
 
+        let hit = false;
         for (let i = 0; i < enemies.length; i++) {
             const en = enemies[i];
             if (fb.x + 20 > en.x && fb.x < en.x + en.w &&
                 fb.y + 20 > en.y && fb.y < en.y + en.h) {
                 if (en.type === 'boss') {
-                    en.hp -= 2;
+                    en.hp = Math.max(0, en.hp - 2);   // ← itt is védve
                     playSfx(320, 'sawtooth', 0.15);
+                    if (en.hp <= 0) {
+                        score += 12000;
+                        enemies.splice(i, 1);
+                        win();
+                        return false;
+                    }
                 } else {
                     enemies.splice(i, 1);
                     score += 200;
                 }
-                return false;
+                hit = true;
+                break;
             }
         }
+        if (hit) return false;
         return fb.x > cameraX - 200 && fb.x < cameraX + 1200;
     });
 
-    // Boss tűzgolyói
     bossFireballs = bossFireballs.filter(fb => {
         fb.x += fb.vx;
         fb.y += fb.vy;
         fb.vy += 0.8;
         if (fb.y > 500) return false;
-
         if (fb.x + 24 > mario.x && fb.x < mario.x + mario.w &&
             fb.y + 24 > mario.y && fb.y < mario.y + mario.h) {
             die();
@@ -481,15 +468,13 @@ function nextLvl() {
 function win() {
     active = false;
     score += 25000;
-    setTimeout(() => document.getElementById('victory').style.display = 'flex', 800);
     playSfx(988, 'sine', 1.2);
+    setTimeout(() => document.getElementById('victory').style.display = 'flex', 800);
 }
 
-// RENDER
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Távoli parallax (felhők)
     ctx.save();
     ctx.translate(-cameraX * 0.18, 0);
     clouds.forEach(c => {
@@ -503,7 +488,6 @@ function render() {
     });
     ctx.restore();
 
-    // 2. Közeli dombok
     ctx.save();
     ctx.translate(-cameraX * 0.52, 0);
     hills.forEach(h => {
@@ -521,7 +505,6 @@ function render() {
     ctx.save();
     ctx.translate(-cameraX, 0);
 
-    // Platformok
     platforms.forEach(p => {
         const px = p.x, py = p.y;
         if (p.type === 'ground') {
@@ -564,7 +547,6 @@ function render() {
         }
     });
 
-    // Items (gomba)
     items.forEach(it => {
         ctx.save();
         ctx.shadowColor = '#ff6666';
@@ -583,7 +565,6 @@ function render() {
         ctx.restore();
     });
 
-    // Ellenségek – GOOMBA részletesebb
     enemies.forEach(en => {
         const ex = en.x, ey = en.y;
         if (en.type === 'goomba') {
@@ -602,7 +583,6 @@ function render() {
             ctx.fillRect(ex + 10, ey + 40 + bobY + Math.sin(frame*0.6)*3, 10, 16);
             ctx.fillRect(ex + 26, ey + 40 + bobY - Math.sin(frame*0.6)*3, 10, 16);
         } else {
-            // BOSS – egyszerűsített, nerf kinézet
             const bx = en.x, by = en.y;
             ctx.fillStyle = '#4b0082';
             ctx.fillRect(bx + 20, by + 40, 100, 100);
@@ -616,12 +596,10 @@ function render() {
                 ctx.lineTo(bx + 60 + s*20, by + 40);
                 ctx.fill();
             }
-            // fej
             ctx.fillStyle = '#654321';
             ctx.fillRect(bx + 80, by + 25, 40, 40);
             ctx.fillStyle = '#ff4444';
-            ctx.fillRect(bx + 90, by + 35, 20, 15); // száj
-            // HP bar
+            ctx.fillRect(bx + 90, by + 35, 20, 15);
             ctx.fillStyle = '#222';
             ctx.fillRect(bx + 20, by + 10, 100, 14);
             const hpW = 100 * (en.hp / en.maxHp);
@@ -630,7 +608,6 @@ function render() {
         }
     });
 
-    // Boss tűzgolyók
     bossFireballs.forEach(fb => {
         ctx.save();
         ctx.shadowColor = '#ff2200';
@@ -646,7 +623,6 @@ function render() {
         ctx.restore();
     });
 
-    // Mario tűzgolyók
     mario.fireballs.forEach(fb => {
         ctx.save();
         ctx.shadowColor = '#ff8800';
@@ -662,7 +638,6 @@ function render() {
         ctx.restore();
     });
 
-    // Mario rajzolás
     const mx = mario.x, my = mario.y;
     const bob = (mario.onGround && Math.abs(mario.vx) > 1.5) ? Math.sin(frame * 0.55) * 5 : 0;
     const squash = Math.max(0, mario.vy * 0.1);
